@@ -1,11 +1,16 @@
 package com.example.ricettario.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -22,5 +27,9 @@ public class Ingredient {
     private Integer id;
 
     @Column
+    @NotNull(message = "campo obbligatorio")
     private String name;
+
+    @OneToMany(mappedBy = "ingredient")
+    private List<RecipeIngredient> recipes = new ArrayList<>();
 }

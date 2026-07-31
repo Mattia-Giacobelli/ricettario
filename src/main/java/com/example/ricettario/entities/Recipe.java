@@ -53,11 +53,12 @@ public class Recipe {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Relazione inversa con i candidati ai sondaggi
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecipeIngredient> ingredients = new ArrayList<>();
+
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PollCandidate> pollCandidates = new ArrayList<>();
 
-    // Relazione inversa con le vittorie nei sondaggi
     @OneToMany(mappedBy = "winningRecipe")
     private List<WeeklyPoll> wonPolls = new ArrayList<>();
 
