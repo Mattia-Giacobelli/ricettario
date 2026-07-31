@@ -22,6 +22,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -38,17 +39,20 @@ public class WeeklyPoll {
     private Integer id;
 
     @Column(name = "week_start", nullable = false)
+    @NotNull(message = "campo obbligatorio")
     private LocalDate weekStart;
 
     @Column(name = "week_end", nullable = false)
+    @NotNull(message = "campo obbligatorio")
     private LocalDate weekEnd;
 
     @Enumerated(EnumType.STRING)
+    @NotNull(message = "campo obbligatorio")
     @Column
     private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "winning_recipe_id")
+    @JoinColumn(name = "winning_recipe_id", referencedColumnName = "id")
     private Recipe winningRecipe;
 
     @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true)
