@@ -26,4 +26,31 @@ public class RecipeService {
 
     }
 
+    public Recipe findById(int id) {
+
+        return recipeRepository.findById(id).orElseThrow();
+
+    }
+
+    @Transactional
+    public Recipe create(Recipe recipe) {
+
+        return recipeRepository.save(recipe);
+
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Recipe update(Recipe recipe) {
+
+        return recipeRepository.save(recipe);
+
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(int id) {
+
+        recipeRepository.deleteById(id);
+
+    }
+
 }

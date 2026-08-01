@@ -42,7 +42,7 @@ public class Recipe {
     @Column(name = "image_url", length = 255)
     private String imageUrl;
 
-    @Column(name = "times_prpared")
+    @Column(name = "times_prepared")
     private Integer timesPrep;
 
     @CreationTimestamp

@@ -14,7 +14,7 @@
 
     <link rel="stylesheet" th:href="@{/styles/style.css}">
 
-    <title>Home ricettario</title>
+    <title>Rating</title>
 </head>
 
 <body>
@@ -28,20 +28,17 @@
             <div class="card">
 
                 <div class="card-header">
-                    <h1 th:text="${recipe.name}"></h1>
+                    <h1 th:text="${rating.recipe.name}"></h1>
                 </div>
 
                 <div class="card-body">
 
-                    <img th:src="@{${recipe.imageUrl}}" alt="recipe photo">
+                    <img th:src="@{${rating.recipe.imageUrl}}" alt="rating photo">
 
-                    <p th:text="${recipe.description}"></p>
+                    <p th:text="${rating.description}"></p>
 
-                    <p th:text="${recipe.instructions}"></p>
+                    <p th:text="${rating.instructions}"></p>
 
-                    <p
-                        th:text="${recipe.timesPrep == 1} ? 'Preparata ' + ${recipe.timesPrep} + ' volta' : 'Preparata ' + ${recipe.timesPrep} + ' volte'">
-                    </p>
 
                 </div>
 

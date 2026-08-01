@@ -48,7 +48,7 @@
                 <thead>
 
                     <tr>
-                        <th class="w-25" scope="col"></th>
+                        <th scope="col"></th>
                         <th scope="col">Nome</th>
                         <th scope="col">Numero di preparazioni</th>
                     </tr>
@@ -59,7 +59,7 @@
 
                     <tr th:each="recipe: ${recipes}">
                         <th scope="row">
-                            <img class="w-50" th:src="${recipe.imageUrl}" alt="anteprima">
+                            <img src="${recipe.imageUrl}" alt="anteprima">
                         </th>
                         <td th:text="${recipe.name}"></td>
                         <td th:text="${recipe.timesPrep}"></td>

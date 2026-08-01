@@ -130,7 +130,7 @@ public class IngredientController {
 
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping("/{id}")
     public String deleteingredient(@RequestParam("id") Integer id, RedirectAttributes red) {
 
         Ingredient ingredient = ingredientService.findById(id);

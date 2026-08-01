@@ -6,6 +6,15 @@
 
 }
 
+/*Dark Theme*/
+
+* {
+
+    background-color: rgba(33, 37, 41, 1) !important;
+    color: white !important;
+
+}
+
 main {
 
     height: 100%;
