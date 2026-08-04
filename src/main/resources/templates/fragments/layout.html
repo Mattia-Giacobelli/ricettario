@@ -53,7 +53,9 @@
                             <a class="nav-link" href="/users">Users</a>
                         </li>
 
-
+                        <li class="nav-item">
+                            <a class="nav-link" href="/users/profile">profilo</a>
+                        </li>
 
                     </ul>
                 </div>
@@ -68,21 +70,19 @@
                 </button>
 
                 <div class="collapse navbar-collapse navbar-dark" id="navbarSupportedContent">
-                    <!-- Right Side Of Navbar -->
-                    <ul class="navbar-nav navbar-dark bg-dark ml-auto">
-                        <!-- Authentication Links -->
 
-                        <!-- SE L'UTENTE NON È AUTENTICATO (Corrisponde a @guest) -->
+                    <ul class="navbar-nav navbar-dark bg-dark ml-auto">
+
                         <th:block sec:authorize="!isAuthenticated()">
                             <li class="nav-item">
                                 <a class="nav-link" th:href="@{/login}">Login</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" th:href="@{/register}">Register</a>
+                                <a class="nav-link" th:href="@{/users/register}">Register</a>
                             </li>
                         </th:block>
 
-                        <!-- SE L'UTENTE È AUTENTICATO (Corrisponde a @else) -->
+                        <!-- Authenticated -->
                         <th:block sec:authorize="isAuthenticated()">
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"

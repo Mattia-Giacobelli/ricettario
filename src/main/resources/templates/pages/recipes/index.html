@@ -51,6 +51,7 @@
                         <th class="w-25" scope="col"></th>
                         <th scope="col">Nome</th>
                         <th scope="col">Numero di preparazioni</th>
+                        <th scope="col"></th>
                     </tr>
 
                 </thead>
@@ -91,7 +92,7 @@
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary"
                                             data-bs-dismiss="modal">Annulla</button>
-                                        <form th:action="@{/recipes/(id=${recipe.id})}" th:method="delete">
+                                        <form th:action="@{/recipes/{id}(id=${recipe.id})}" th:method="delete">
                                             <button type="submit" class="btn btn-danger">Elimina</button>
                                         </form>
                                     </div>

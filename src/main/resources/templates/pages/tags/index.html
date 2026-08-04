@@ -14,7 +14,7 @@
 
     <link rel="stylesheet" th:href="@{/styles/style.css}">
 
-    <title>Ricette</title>
+    <title>Tags</title>
 </head>
 
 <body>
@@ -27,10 +27,10 @@
 
             <div class="d-flex justify-content-between align-items-center pt-4 pb-5">
 
-                <h1>Ricette</h1>
+                <h1>Tags</h1>
 
-                <a href="/recipes/create" class="btn btn-primary">
-                    Aggiungi ricetta
+                <a href="/tags/create" class="btn btn-primary">
+                    Aggiungi Tag
                 </a>
 
             </div>
@@ -39,43 +39,42 @@
 
             </h4>
 
-            <h1 class="text-center" th:if="${recipes.size == 0}">
-                Nessuna Ricetta trovata
+            <h1 class="text-center" th:if="${tags.size == 0}">
+                Nessun Tag trovato
             </h1>
 
-            <table class="table" th:if="${recipes.size > 0}">
+            <table class="table" th:if="${tags.size > 0}">
 
                 <thead>
 
                     <tr>
                         <th scope="col"></th>
                         <th scope="col">Nome</th>
-                        <th scope="col">Numero di preparazioni</th>
+                        <th scope="col"></th>
                     </tr>
 
                 </thead>
 
                 <tbody>
 
-                    <tr th:each="recipe: ${recipes}">
-                        <th scope="row">
-                            <img src="${recipe.imageUrl}" alt="anteprima">
-                        </th>
-                        <td th:text="${recipe.name}"></td>
-                        <td th:text="${recipe.timesPrep}"></td>
+                    <tr th:each="tag: ${tags}">
+
+                        <td th:text="${tag.id}"></td>
+                        <td th:text="${tag.name}"></td>
+
 
                         <td>
-                            <a th:href="@{/recipes/update/{id}(id=${recipe.id})}" class="btn btn-warning">
+                            <a th:href="@{/tags/update/{id}(id=${tag.id})}" class="btn btn-warning">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal"
-                                th:data-bs-target="'#deleteModal' + ${recipe.id}">
+                                th:data-bs-target="'#deleteModal' + ${tag.id}">
                                 <i class="bi bi-trash3"></i>
                             </button>
                         </td>
 
                         <!-- Modal -->
-                        <div class="modal fade" th:id="'deleteModal' + ${recipe.id}" tabindex="-1"
+                        <div class="modal fade" th:id="'deleteModal' + ${tag.id}" tabindex="-1"
                             aria-labelledby="deleteModalLabel" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -85,13 +84,13 @@
                                             aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body"
-                                        th:text="'Sei sicuro di voler eliminare' + ${recipe.name} + '?'">
+                                        th:text="'Sei sicuro di voler eliminare' + ${tag.name} + '?'">
 
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary"
                                             data-bs-dismiss="modal">Annulla</button>
-                                        <form th:action="@{/recipes/(id=${recipe.id})}" th:method="delete">
+                                        <form th:action="@{/tags/{id}(id=${tag.id})}" th:method="delete">
                                             <button type="submit" class="btn btn-danger">Elimina</button>
                                         </form>
                                     </div>
@@ -114,19 +113,19 @@
                 <nav aria-label="Page navigation">
                     <ul class="pagination">
 
-                        <li class="page-item" th:classappend="${!recipes.hasPrevious()} ? 'disabled'">
-                            <a class="page-link" th:href="@{/recipes(page=${recipes.number - 1})}">Precedente</a>
+                        <li class="page-item" th:classappend="${!tags.hasPrevious()} ? 'disabled'">
+                            <a class="page-link" th:href="@{/tags(page=${tags.number - 1})}">Precedente</a>
                         </li>
 
                         <li class="page-item disabled">
                             <span class="page-link">
-                                Pagina <span th:text="${recipes.number + 1}">1</span> di <span
-                                    th:text="${recipes.totalPages}">1</span>
+                                Pagina <span th:text="${tags.number + 1}">1</span> di <span
+                                    th:text="${tags.totalPages}">1</span>
                             </span>
                         </li>
 
-                        <li class="page-item" th:classappend="${!recipes.hasNext()} ? 'disabled'">
-                            <a class="page-link" th:href="@{/recipes(page=${recipes.number + 1})}">Successivo</a>
+                        <li class="page-item" th:classappend="${!tags.hasNext()} ? 'disabled'">
+                            <a class="page-link" th:href="@{/tags(page=${tags.number + 1})}">Successivo</a>
                         </li>
 
                     </ul>

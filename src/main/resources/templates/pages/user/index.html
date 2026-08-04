@@ -14,7 +14,7 @@
 
     <link rel="stylesheet" th:href="@{/styles/style.css}">
 
-    <title>Ratings</title>
+    <title>Users</title>
 </head>
 
 <body>
@@ -27,11 +27,11 @@
 
             <div class="d-flex justify-content-between align-items-center pt-4 pb-5">
 
-                <h1>Ratings</h1>
+                <h1>Utenti</h1>
 
-                <!-- <a href="/ratings/create" class="btn btn-primary">
-                    Aggiungi Rating
-                </a> -->
+                <a href="/users/create" class="btn btn-primary">
+                    Aggiungi Utente
+                </a>
 
             </div>
 
@@ -39,22 +39,18 @@
 
             </h4>
 
-            <h1 class="text-center" th:if="${ratings.size == 0}">
-                Nessun rating trovato
+            <h1 class="text-center" th:if="${users.size == 0}">
+                Nessun utente trovato
             </h1>
 
-            <table class="table" th:if="${ratings.size > 0}">
+            <table class="table" th:if="${users.size > 0}">
 
                 <thead>
 
                     <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Ricetta</th>
-                        <th scope="col">Difficoltà</th>
-                        <th scope="col">Costo</th>
-                        <th scope="col">Tempo di preparazione</th>
-                        <th scope="col">Intensità del gusto</th>
-                        <th scope="col">Overall</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Permesso</th>
                         <th scope="col"></th>
                     </tr>
 
@@ -62,31 +58,25 @@
 
                 <tbody>
 
-                    <tr th:each="rating: ${ratings}">
-                        <th scope="row">
-                            <img src="${rating.imageUrl}" alt="anteprima">
-                        </th>
-                        <td th:text="${rating.recipeId}"></td>
-                        <td th:text="${rating.recipe.name}"></td>
-                        <td th:text="${rating.difficulty}"></td>
-                        <td th:text="${rating.cost}"></td>
-                        <td th:text="${rating.prepTime}"></td>
-                        <td th:text="${rating.tasteIntensity}"></td>
-                        <td th:text="${rating.overall}"></td>
+                    <tr th:if="${#authentication.name != user.username}" th:each="user: ${users}">
+
+                        <td th:text="${user.username}"><a th:href="@{/users/{id}(id=${user.id})}"></a></td>
+                        <td th:text="${user.email}"></td>
+                        <td th:text="${user.permission.permissionType}"></td>
 
 
                         <td>
-                            <a th:href="@{/ratings/update/{id}(id=${rating.recipeId})}" class="btn btn-warning">
+                            <a th:href="@{/users/update/{id}(id=${user.id})}" class="btn btn-warning">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal"
-                                th:data-bs-target="'#deleteModal' + ${rating.recipeId}">
+                                th:data-bs-target="'#deleteModal' + ${user.id}">
                                 <i class="bi bi-trash3"></i>
                             </button>
                         </td>
 
                         <!-- Modal -->
-                        <div class="modal fade" th:id="'deleteModal' + ${rating.recipeId}" tabindex="-1"
+                        <div class="modal fade" th:id="'deleteModal' + ${user.id}" tabindex="-1"
                             aria-labelledby="deleteModalLabel" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -96,13 +86,13 @@
                                             aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body"
-                                        th:text="'Sei sicuro di voler eliminare' + ${rating.recipe.name} + '?'">
+                                        th:text="'Sei sicuro di voler eliminare' + ${user.username} + '?'">
 
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary"
                                             data-bs-dismiss="modal">Annulla</button>
-                                        <form th:action="@{/ratings/{id}(id=${rating.id})}" th:method="delete">
+                                        <form th:action="@{/users/{id}(id=${user.id})}" th:method="delete">
                                             <button type="submit" class="btn btn-danger">Elimina</button>
                                         </form>
                                     </div>
@@ -125,19 +115,19 @@
                 <nav aria-label="Page navigation">
                     <ul class="pagination">
 
-                        <li class="page-item" th:classappend="${!ratings.hasPrevious()} ? 'disabled'">
-                            <a class="page-link" th:href="@{/ratings(page=${ratings.number - 1})}">Precedente</a>
+                        <li class="page-item" th:classappend="${!users.hasPrevious()} ? 'disabled'">
+                            <a class="page-link" th:href="@{/users(page=${users.number - 1})}">Precedente</a>
                         </li>
 
                         <li class="page-item disabled">
                             <span class="page-link">
-                                Pagina <span th:text="${ratings.number + 1}">1</span> di <span
-                                    th:text="${ratings.totalPages}">1</span>
+                                Pagina <span th:text="${users.number + 1}">1</span> di <span
+                                    th:text="${users.totalPages}">1</span>
                             </span>
                         </li>
 
-                        <li class="page-item" th:classappend="${!ratings.hasNext()} ? 'disabled'">
-                            <a class="page-link" th:href="@{/ratings(page=${ratings.number + 1})}">Successivo</a>
+                        <li class="page-item" th:classappend="${!users.hasNext()} ? 'disabled'">
+                            <a class="page-link" th:href="@{/users(page=${users.number + 1})}">Successivo</a>
                         </li>
 
                     </ul>

@@ -50,6 +50,7 @@
                     <tr>
                         <th scope="col">ID</th>
                         <th scope="col">Nome</th>
+                        <th scope="col"></th>
                     </tr>
 
                 </thead>
@@ -87,7 +88,7 @@
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary"
                                             data-bs-dismiss="modal">Annulla</button>
-                                        <form th:action="@{/ingredients/(id=${ingredient.id})}" th:method="delete">
+                                        <form th:action="@{/ingredients/{id}(id=${ingredient.id})}" th:method="delete">
                                             <button type="submit" class="btn btn-danger">Elimina</button>
                                         </form>
                                     </div>

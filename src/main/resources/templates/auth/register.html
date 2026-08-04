@@ -14,7 +14,7 @@
 
     <!-- <link rel="stylesheet" th:href="@{/styles/style.css}"> -->
 
-    <title>Login</title>
+    <title>Register</title>
 </head>
 
 <body>
@@ -50,7 +50,7 @@
                 <div class="card-header">
 
                     <h1>
-                        Login
+                        Registrati
                     </h1>
 
                 </div>
@@ -61,26 +61,33 @@
                         Credenziali non valide.
                     </div>
 
-                    <form th:action="@{/login}" method="post" autocomplete="on">
+                    <form th:action="@{/users/register}" th:object="${user}" method="post">
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" th:field="*{username}"
+                                th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
+                            <span class="invalid-feedback" th:if="${#fields.hasErrors('username')}"
+                                th:errors="*{username}"></span>
+                        </div>
+
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email">
-                            <span class="invalid-feedback" </span>
+                            <input type="email" class="form-control" id="email" th:field="*{email}"
+                                th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+                            <span class="invalid-feedback" th:if="${#fields.hasErrors('email')}"
+                                th:errors="*{email}"></span>
                         </div>
 
                         <div class="mb-3">
-
                             <label for="password" class="form-label">Password</label>
-
-                            <input type="password" class="form-control" id="password" name="password">
-
+                            <input type="password" class="form-control" id="password" th:field="*{password}"
+                                th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''">
+                            <span class="invalid-feedback" th:if="${#fields.hasErrors('password')}"
+                                th:errors="*{password}"></span>
                         </div>
 
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary">
-                                Login
-                            </button>
-                        </div>
+                        <button type="submit" class="btn btn-primary">Registrati</button>
                     </form>
                 </div>
             </div>

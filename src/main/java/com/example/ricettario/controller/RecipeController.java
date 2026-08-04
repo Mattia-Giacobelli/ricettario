@@ -190,7 +190,7 @@ public class RecipeController {
 
     }
 
-    @DeleteMapping("")
+    @DeleteMapping("/{id}")
     public String deleteRecipe(@PathVariable int id, RedirectAttributes red) {
 
         Recipe recipe = recipeService.findById(id);
