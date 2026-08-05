@@ -1,4 +1,4 @@
-name: Build Spring Boot JAR
+name: Build e Deploy Automatico su GCP
 
 on:
   push:
@@ -7,13 +7,15 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+    # 1. Scarica il codice dal repository
     - name: Checkout del codice
       uses: actions/checkout@v4
 
+    # 2. Configura Java 21
     - name: Configura Java 21
       uses: actions/setup-java@v5
       with:
@@ -21,14 +23,32 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: Permessi wrapper Maven (se presente)
+    # 3. Permessi per il wrapper Maven (se presente)
+    - name: Permessi wrapper Maven
       run: test -f ./mvnw && chmod +x ./mvnw || true
 
+    # 4. Compilazione del pacchetto JAR
     - name: Compila e genera il JAR
       run: mvn clean package -DskipTests
 
-    - name: Salva il JAR come Artifact
-      uses: actions/upload-artifact@v4
+    # 5. Trasferimento del JAR sulla VM GCP via SSH
+    - name: Invia il JAR alla VM
+      uses: appleboy/scp-action@v0.1.7
       with:
-        name: app-jar
-        path: target/*.jar
+        host: ${{ secrets.GCP_VM_HOST }}
+        username: ${{ secrets.GCP_VM_USER }}
+        key: ${{ secrets.GCP_VM_SSH_KEY }}
+        source: "target/*.jar"
+        target: "~/app_temp/"
+        strip_components: 1
+
+    # 6. Sostituzione del vecchio JAR e riavvio del servizio sulla VM
+    - name: Riavvia l'applicazione Spring Boot sulla VM
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.GCP_VM_HOST }}
+        username: ${{ secrets.GCP_VM_USER }}
+        key: ${{ secrets.GCP_VM_SSH_KEY }}
+        script: |
+          mv ~/app_temp/*.jar ~/app.jar
+          sudo systemctl restart ricettario
