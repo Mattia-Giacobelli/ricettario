@@ -173,7 +173,7 @@ public class UserController {
         System.out.println("PROFILE");
         // System.out.println(userD.getUsername());
 
-        User user = userService.findByUsername("Admin");
+        User user = userService.findByUsername(userD.getUsername());
 
         userModel.addAttribute("user", user);
 
@@ -184,7 +184,7 @@ public class UserController {
     public String updateUser(@AuthenticationPrincipal UserDetails userD, Model userM) {
 
         userM.addAttribute("permissions", permissionService.findAll());
-        userM.addAttribute("user", userService.findByUsername("Admin"));
+        userM.addAttribute("user", userService.findByUsername(userD.getUsername()));
 
         return "pages/user/userForm";
 

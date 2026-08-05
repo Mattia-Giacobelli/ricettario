@@ -23,6 +23,12 @@ public class RecipeIngredientService {
         this.ingredientRepository = ingredientRepository;
     }
 
+    public boolean existsByRecipe_IdAndIngredient_Id(Integer recipeId, Integer ingredientId) {
+
+        return recipeIngredientRepository.existsByRecipe_IdAndIngredient_Id(recipeId, ingredientId);
+
+    }
+
     public void addIngredientToRecipe(int recipeId, int ingredientId, String quantity, String unit, String notes) {
 
         Recipe recipe = recipeRepository.findById(recipeId)
@@ -38,7 +44,10 @@ public class RecipeIngredientService {
         ri.setUnit(unit);
         ri.setNotes(notes);
 
-        recipeIngredientRepository.save(ri);
+        if (!existsByRecipe_IdAndIngredient_Id(recipe.getId(), ingredient.getId())) {
+            recipeIngredientRepository.save(ri);
+        }
+
     }
 
     public List<RecipeIngredient> getIngredientsForRecipe(int recipeId) {

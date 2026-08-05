@@ -29,4 +29,11 @@ public class RecipeRatingService {
 
     }
 
+    @Transactional
+    public RecipeRating update(RecipeRating recipeRating) {
+
+        return recipeRatingRepository.save(recipeRating);
+
+    }
+
 }

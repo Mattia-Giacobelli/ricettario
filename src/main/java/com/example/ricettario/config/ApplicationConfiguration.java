@@ -1,4 +1,4 @@
-package com.example.ricettario.security;
+package com.example.ricettario.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -29,7 +29,7 @@
 
                 <h1>Ricette</h1>
 
-                <a href="/recipes/create" class="btn btn-primary">
+                <a sec:authorize="hasRole('ADMIN')" href="/recipes/create" class="btn btn-primary">
                     Aggiungi ricetta
                 </a>
 
@@ -68,11 +68,12 @@
                         <td th:text="${recipe.timesPrep}"></td>
 
                         <td>
-                            <a th:href="@{/recipes/update/{id}(id=${recipe.id})}" class="btn btn-warning">
+                            <a sec:authorize="hasRole('ADMIN')" th:href="@{/recipes/update/{id}(id=${recipe.id})}"
+                                class="btn btn-warning">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal"
-                                th:data-bs-target="'#deleteModal' + ${recipe.id}">
+                            <button sec:authorize="hasRole('ADMIN')" type="button" class="btn btn-danger"
+                                data-bs-toggle="modal" th:data-bs-target="'#deleteModal' + ${recipe.id}">
                                 <i class="bi bi-trash3"></i>
                             </button>
                         </td>

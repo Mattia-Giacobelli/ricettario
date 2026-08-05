@@ -29,7 +29,7 @@
 
                 <h1>Ingredienti</h1>
 
-                <a href="/ingredients/create" class="btn btn-primary">
+                <a sec:authorize="hasRole('ADMIN')" href="/ingredients/create" class="btn btn-primary">
                     Aggiungi Ingrediente
                 </a>
 
@@ -62,11 +62,12 @@
                         <td th:text="${ingredient.name}"></td>
 
                         <td>
-                            <a th:href="@{/ingredients/update/{id}(id=${ingredient.id})}" class="btn btn-warning">
+                            <a sec:authorize="hasRole('ADMIN')"
+                                th:href="@{/ingredients/update/{id}(id=${ingredient.id})}" class="btn btn-warning">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal"
-                                th:data-bs-target="'#deleteModal' + ${ingredient.id}">
+                            <button sec:authorize="hasRole('ADMIN')" type="button" class="btn btn-danger"
+                                data-bs-toggle="modal" th:data-bs-target="'#deleteModal' + ${ingredient.id}">
                                 <i class="bi bi-trash3"></i>
                             </button>
                         </td>

@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +34,7 @@ import com.example.ricettario.DTO.RecipeFormDTO;
 import com.example.ricettario.DTO.TagRowDTO;
 import com.example.ricettario.entities.Ingredient;
 import com.example.ricettario.entities.Recipe;
+import com.example.ricettario.entities.RecipeIngredient;
 import com.example.ricettario.entities.RecipeRating;
 import com.example.ricettario.entities.Tag;
 import com.example.ricettario.service.IngredientService;
@@ -217,27 +220,147 @@ public class RecipeController {
     @GetMapping("/update/{id}")
     public String updateForm(@PathVariable int id, Model recipeM) {
 
-        recipeM.addAttribute("recipe", recipeService.findById(id));
+        // Setup form dto
+
+        Recipe recipe = recipeService.findById(id);
+        RecipeFormDTO recipeF = new RecipeFormDTO();
+
+        recipeF.setId(recipe.getId());
+        recipeF.setName(recipe.getName());
+        recipeF.setImageUrl(recipe.getImageUrl());
+        recipeF.setDescription(recipe.getDescription());
+        recipeF.setInstructions(recipe.getInstructions());
+        recipeF.setTimesPrep(recipe.getTimesPrep());
+
+        // Populate tagrow dto field
+
+        for (Tag tag : recipe.getTags()) {
+            TagRowDTO tagRow = new TagRowDTO();
+
+            tagRow.setName(tag.getName());
+            recipeF.getTags().add(tagRow);
+        }
+
+        // Populate tingredientRow dto field
+
+        for (RecipeIngredient ing : recipe.getIngredients()) {
+            IngredientRowDTO ingredientRow = new IngredientRowDTO();
+
+            ingredientRow.setName(ing.getIngredient().getName());
+            ingredientRow.setQuantity(ing.getQuantity());
+            ingredientRow.setUnit(ing.getUnit());
+            ingredientRow.setNotes(ing.getNotes());
+            recipeF.getIngredients().add(ingredientRow);
+        }
+
+        // Populate ratings
+
+        RatingDTO ratingDTO = new RatingDTO();
+        RecipeRating rating = recipe.getRating();
+
+        ratingDTO.setDifficulty(rating.getDifficulty());
+        ratingDTO.setCost(rating.getCost());
+        ratingDTO.setPrepTime(rating.getPrepTime());
+        ratingDTO.setTasteIntensity(rating.getTasteIntensity());
+        recipeF.setRating(ratingDTO);
+
+        recipeM.addAttribute("recipe", recipeF);
+        recipeM.addAttribute("allTags", tagService.findAll());
+        recipeM.addAttribute("recipeTags", recipe.getTags());
 
         return "pages/recipes/newRecipeForm";
     }
 
     @PutMapping("/{id}")
-    public String update(@PathVariable String id, @Validated @ModelAttribute("recipe") Recipe recipe,
-            @RequestParam(value = "image") MultipartFile img, BindingResult result, RedirectAttributes red,
-            Model recipeM) throws IOException {
+    public String update(@PathVariable int id, @Validated @ModelAttribute("recipe") RecipeFormDTO recipe,
+            @RequestParam("image") MultipartFile img,
+            BindingResult result, Model recipeM, RedirectAttributes red) throws IOException {
+
+        recipe.getTags().forEach(t -> System.out.println("TAG DTO ARRIVATO: " + t.getName()));
 
         if (result.hasErrors()) {
 
             recipeM.addAttribute("recipe", recipe);
+            recipeM.addAttribute("allTags", tagService.findAll());
+            recipeM.addAttribute("recipeTags", recipe.getTags());
 
             return "pages/recipes/newRecipeForm";
 
         } else {
 
-            Recipe oldRecipe = recipeService.findById(recipe.getId());
+            Recipe oldRecipe = recipeService.findById(id);
+            oldRecipe.setName(recipe.getName());
+            oldRecipe.setDescription(recipe.getDescription());
+            oldRecipe.setInstructions(recipe.getInstructions());
+            oldRecipe.setTimesPrep(recipe.getTimesPrep());
 
-            if (oldRecipe.equals(recipe)) {
+            if (img != null && !img.isEmpty()) {
+                deleteOldImg(oldRecipe.getImageUrl());
+                oldRecipe.setImageUrl(saveImg(img));
+            }
+
+            // Tags
+
+            for (TagRowDTO row : recipe.getTags()) {
+
+                if (row.getName() == null || row.getName().isBlank())
+                    continue;
+
+                Tag newTag = new Tag();
+                newTag.setName(row.getName().trim());
+
+                Tag tag = tagService.findByName(row.getName().trim())
+                        .orElseGet(() -> tagService.create(newTag));
+
+                System.out.println("Tag trovato: " + tag.getId() + " - " + tag.getName());
+
+                oldRecipe.getTags().forEach(t -> System.out.println("Tag ricetta: " + t.getId() + " - " + t.getName()));
+
+                boolean checkExists = oldRecipe.getTags().stream()
+                        .anyMatch(t -> t.getName().equalsIgnoreCase(tag.getName()));
+
+                System.out.println("checkExists = " + checkExists);
+
+                System.out.println("Tag prima: " + oldRecipe.getTags().size());
+
+                if (!checkExists) {
+                    oldRecipe.getTags().add(tag);
+                }
+
+                System.out.println("Tag dopo: " + oldRecipe.getTags().size());
+
+            }
+
+            // Ingredients
+
+            for (IngredientRowDTO row : recipe.getIngredients()) {
+
+                if (row.getName() == null || row.getName().isBlank())
+                    continue;
+
+                Ingredient newIngredient = new Ingredient();
+                newIngredient.setName(row.getName().trim());
+
+                Ingredient ingredient = ingredientService.findByName(row.getName().trim())
+                        .orElseGet(() -> ingredientService.create(newIngredient));
+
+                recipeIngredientService.addIngredientToRecipe(
+                        oldRecipe.getId(), ingredient.getId(),
+                        row.getQuantity(), row.getUnit(), row.getNotes());
+            }
+
+            // Rating
+            RatingDTO rating = recipe.getRating();
+            RecipeRating recipeRating = new RecipeRating();
+            recipeRating.setRecipeId(oldRecipe.getId());
+            recipeRating.setRecipe(oldRecipe);
+            recipeRating.setDifficulty(rating.getDifficulty());
+            recipeRating.setCost(rating.getCost());
+            recipeRating.setPrepTime(rating.getPrepTime());
+            recipeRating.setTasteIntensity(rating.getTasteIntensity());
+            recipeRatingService.update(recipeRating);
+
+            if (oldRecipe.equals(oldRecipe)) {
 
                 red.addFlashAttribute("msg", recipe.getName() + ", Nessuna modifica apportata");
 
@@ -245,12 +368,7 @@ public class RecipeController {
 
             }
 
-            if (img != null && !img.isEmpty()) {
-                deleteOldImg(oldRecipe.getImageUrl());
-                recipe.setImageUrl(saveImg(img));
-            }
-
-            recipeService.update(recipe);
+            recipeService.update(oldRecipe);
 
             red.addFlashAttribute("msg", recipe.getName() + ", Ricetta modificata correttamente");
 

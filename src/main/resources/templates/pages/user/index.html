@@ -29,7 +29,7 @@
 
                 <h1>Utenti</h1>
 
-                <a href="/users/create" class="btn btn-primary">
+                <a sec:authorize="hasRole('ADMIN')" href="/users/create" class="btn btn-primary">
                     Aggiungi Utente
                 </a>
 
@@ -66,11 +66,12 @@
 
 
                         <td>
-                            <a th:href="@{/users/update/{id}(id=${user.id})}" class="btn btn-warning">
+                            <a sec:authorize="hasRole('ADMIN')" th:href="@{/users/update/{id}(id=${user.id})}"
+                                class="btn btn-warning">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal"
-                                th:data-bs-target="'#deleteModal' + ${user.id}">
+                            <button sec:authorize="hasRole('ADMIN')" type="button" class="btn btn-danger"
+                                data-bs-toggle="modal" th:data-bs-target="'#deleteModal' + ${user.id}">
                                 <i class="bi bi-trash3"></i>
                             </button>
                         </td>

@@ -80,7 +80,6 @@
                         th:errors="*{timesPrep}"></span>
                 </div>
 
-                <!-- TAG: input libero con suggerimenti dai tag esistenti -->
                 <div class="mb-3">
                     <label class="form-label d-block">Tag</label>
 
@@ -94,7 +93,6 @@
                     <div id="selectedTagsContainer" class="d-flex flex-wrap gap-2"></div>
                 </div>
 
-                <!-- INGREDIENTI: righe dinamiche -->
                 <div class="mb-3">
                     <label>Ingredienti</label>
                     <div id="ingredientRows"></div>
@@ -103,7 +101,7 @@
                 </div>
 
                 <datalist id="ingredientOptions">
-                    <option th:each="ing : ${allIngredients}" th:value="${ing.name}"></option>
+                    <option th:each="ing : ${allIngredients}" th:value="${ing.ingredient.name}"></option>
                 </datalist>
 
                 <!-- RATING -->
@@ -143,41 +141,62 @@
     <div th:replace="~{fragments/layout :: footer}"></div>
 
     <script th:inline="javascript">
+        const availableIng = /*[[${recipe.ingredients}]]*/[];
         let rowIndex = 0;
 
-        function addIngredientRow() {
+        function addIngredientRow(data = null) {
             const container = document.getElementById('ingredientRows');
             const div = document.createElement('div');
             div.className = 'ingredient-row mb-2 d-flex gap-2';
+
+            // Estrazione dei dati: gestisce sia RecipeIngredient (ing.ingredient.name) sia il form vuoto
+            const name = data && data.name ? data.name : '';
+            const quantity = data && data.quantity ? data.quantity : '';
+            const unit = data && data.unit ? data.unit : '';
+            const notes = data && data.notes ? data.notes : '';
+
             div.innerHTML = `
-                <div class="w-25">
-                    <label>Nome</label>
-                    <input type="text" name="ingredients[${rowIndex}].name" list="ingredientOptions" placeholder="Nome ingrediente" class="form-control">
-                </div>
-                <div class="w-25">
-                    <label>Quantità</label>
-                    <input type="text" name="ingredients[${rowIndex}].quantity" placeholder="Quantità" class="form-control">
-                </div>
-                <div class="w-25">
-                    <label>Unità di misura</label>
-                    <input type="text" name="ingredients[${rowIndex}].unit" placeholder="Unità (g, ml, pz...)" class="form-control">
-                </div>
-                <div class="w-25">
-                    <label>Note</label>
-                    <input type="text" name="ingredients[${rowIndex}].notes" placeholder="Note" class="form-control">
-                </div>
-                <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">✕</button>
-            `;
+        <div class="w-25">
+            <label>Nome</label>
+            <input type="text" name="ingredients[${rowIndex}].name" value="${name}" list="ingredientOptions" placeholder="Nome ingrediente" class="form-control">
+        </div>
+        <div class="w-25">
+            <label>Quantità</label>
+            <input type="text" name="ingredients[${rowIndex}].quantity" value="${quantity}" placeholder="Quantità" class="form-control">
+        </div>
+        <div class="w-25">
+            <label>Unità di misura</label>
+            <input type="text" name="ingredients[${rowIndex}].unit" value="${unit}" placeholder="Unità (g, ml, pz...)" class="form-control">
+        </div>
+        <div class="w-25">
+            <label>Note</label>
+            <input type="text" name="ingredients[${rowIndex}].notes" value="${notes}" placeholder="Note" class="form-control">
+        </div>
+        <button type="button" class="btn btn-danger btn-sm align-self-end" onclick="this.parentElement.remove()">✕</button>
+    `;
+
             container.appendChild(div);
             rowIndex++;
         }
 
-        addIngredientRow();
+        // Inizializzazione al caricamento della pagina
+        document.addEventListener("DOMContentLoaded", () => {
+            if (availableIng && availableIng.length > 0) {
+
+                addIngredientRow();
+
+                availableIng.forEach(ing => addIngredientRow(ing));
+            } else {
+
+                addIngredientRow();
+            }
+        });
+
     </script>
 
     <script th:inline="javascript">
         const availableTags = /*[[${allTags}]]*/[];
-        const selectedTags = [];
+        const selectedTags = /*[[${recipeTags}]]*/[];
         let tagRowIndex = 0;
 
         function onTagSearch(input) {
@@ -217,7 +236,7 @@
         }
 
         function selectTag(id, name) {
-            selectedTags.push({ existingId: id, name: null, label: name });
+            selectedTags.push({ existingId: id, name: name, label: name });
             renderSelectedTags();
             clearTagSearch();
         }
@@ -248,7 +267,7 @@
                 const chip = document.createElement('span');
                 chip.className = 'badge bg-primary d-flex align-items-center gap-1 p-2';
                 chip.innerHTML = `
-                    ${tag.label}
+                    ${tag.label || tag.name}
                     <button type="button" class="btn-close btn-close-white btn-sm" style="font-size:0.6rem;" onclick="removeTag(${index})"></button>
                     <input type="hidden" name="tags[${index}].existingId" value="${tag.existingId ?? ''}">
                     <input type="hidden" name="tags[${index}].name" value="${tag.name ?? ''}">
@@ -262,6 +281,11 @@
                 document.getElementById('tagSuggestions').style.display = 'none';
             }
         });
+
+        document.addEventListener("DOMContentLoaded", (e) => {
+            renderSelectedTags()
+        })
+
     </script>
 
 
