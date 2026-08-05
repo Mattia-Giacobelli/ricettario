@@ -50,5 +50,6 @@ jobs:
         username: ${{ secrets.GCP_VM_USER }}
         key: ${{ secrets.GCP_VM_SSH_KEY }}
         script: |
+          mkdir -p ~/
           mv ~/app_temp/*.jar ~/app.jar
           sudo systemctl restart ricettario
