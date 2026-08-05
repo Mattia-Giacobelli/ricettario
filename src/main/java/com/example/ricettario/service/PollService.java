@@ -9,7 +9,7 @@ import com.example.ricettario.entities.PollCandidate;
 import com.example.ricettario.entities.PollVote;
 import com.example.ricettario.entities.User;
 import com.example.ricettario.entities.WeeklyPoll;
-import com.example.ricettario.repositories.IPollCandidateRepository;
+import com.example.ricettario.repositories.ICandidateRepository;
 import com.example.ricettario.repositories.IPollVoteRepository;
 import com.example.ricettario.repositories.IWeeklyPollRepository;
 import com.example.ricettario.utilities.Status;
@@ -19,10 +19,10 @@ import com.example.ricettario.utilities.Status;
 public class PollService {
 
     private final IWeeklyPollRepository pollRepository;
-    private final IPollCandidateRepository candidateRepository;
+    private final ICandidateRepository candidateRepository;
     private final IPollVoteRepository voteRepository;
 
-    public PollService(IWeeklyPollRepository pollRepository, IPollCandidateRepository candidateRepository,
+    public PollService(IWeeklyPollRepository pollRepository, ICandidateRepository candidateRepository,
             IPollVoteRepository voteRepository) {
 
         this.pollRepository = pollRepository;

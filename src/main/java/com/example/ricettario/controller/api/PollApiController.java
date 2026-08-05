@@ -1,17 +1,23 @@
 package com.example.ricettario.controller.api;
 
 import com.example.ricettario.DTO.ActivePollResponseDTO;
+import com.example.ricettario.DTO.AddRecipeRequestDTO;
 import com.example.ricettario.DTO.CandidateResponseDTO;
 import com.example.ricettario.DTO.VoteRequestDTO;
 import com.example.ricettario.entities.PollCandidate;
+import com.example.ricettario.entities.Recipe;
 import com.example.ricettario.entities.User;
 import com.example.ricettario.entities.WeeklyPoll;
 import com.example.ricettario.service.CandidateService;
 import com.example.ricettario.service.PollService;
+import com.example.ricettario.service.RecipeService;
 import com.example.ricettario.service.UserService;
 import com.example.ricettario.service.VoteService;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -24,13 +30,17 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/polls")
 public class PollApiController {
 
+    private final RecipeService recipeService;
     private final PollService pollService;
     private final UserService userService;
     private final CandidateService candidateService;
     private final VoteService voteService;
 
-    public PollApiController(PollService pollService, UserService userService, CandidateService candidateService,
+    public PollApiController(RecipeService recipeService, PollService pollService, UserService userService,
+            CandidateService candidateService,
             VoteService voteService) {
+
+        this.recipeService = recipeService;
         this.pollService = pollService;
         this.userService = userService;
         this.candidateService = candidateService;
@@ -89,4 +99,101 @@ public class PollApiController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/{pollId}/addrecipe")
+    public ResponseEntity<?> addRecipeToPoll(
+            @PathVariable Integer pollId,
+            @Valid @RequestBody AddRecipeRequestDTO candidates) {
+
+        // Check poll
+
+        WeeklyPoll poll = pollService.getActivePoll();
+
+        if (poll == null) {
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Sondaggio non trovato con ID: " + pollId));
+
+        }
+
+        // Check recipe
+        Recipe recipe = recipeService.findById(candidates.getRecipeId());
+
+        if (recipe == null) {
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Ricetta non trovata con ID: " + candidates.getRecipeId()));
+
+        }
+
+        // Check duplicates
+
+        if (candidateService.existsByPollIdAndRecipeId(pollId, candidates.getRecipeId())) {
+
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", "La ricetta è già stata aggiunta a questo sondaggio"));
+
+        }
+
+        // Save recipe
+
+        PollCandidate candidate = new PollCandidate();
+        candidate.setPoll(poll);
+        candidate.setRecipe(recipe);
+        PollCandidate saved = candidateService.create(candidate);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                "candidateId", saved.getId(),
+                "pollId", pollId,
+                "recipeId", recipe.getId(),
+                "message", "Ricetta aggiunta con successo al sondaggio"));
+    }
+
+    @DeleteMapping("/{pollID}/deleterecipe")
+    public ResponseEntity<?> updateRecipe(@PathVariable Integer pollId,
+            @Valid @RequestBody AddRecipeRequestDTO candidates) {
+
+        // Check poll
+
+        WeeklyPoll poll = pollService.getActivePoll();
+
+        if (poll == null) {
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Sondaggio non trovato con ID: " + pollId));
+
+        }
+
+        // Check recipe
+        Recipe recipe = recipeService.findById(candidates.getRecipeId());
+
+        if (recipe == null) {
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Ricetta non trovata con ID: " + candidates.getRecipeId()));
+
+        }
+
+        // Check duplicates
+
+        if (candidateService.existsByPollIdAndRecipeId(pollId, candidates.getRecipeId())) {
+
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", "La ricetta è già stata aggiunta a questo sondaggio"));
+
+        }
+
+        // Save recipe
+
+        PollCandidate candidate = candidateService.findByPollIdAndRecipeId(pollId, pollId);
+        candidateService.delete(candidate);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                "candidateId", candidate.getId(),
+                "pollId", pollId,
+                "recipeId", recipe.getId(),
+                "message", "Ricetta rimossa con successo dal sondaggio"));
+
+    }
+
 }

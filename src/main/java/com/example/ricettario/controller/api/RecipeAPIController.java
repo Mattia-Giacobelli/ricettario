@@ -10,6 +10,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,6 +34,7 @@ import com.example.ricettario.service.RecipeIngredientService;
 import com.example.ricettario.service.RecipeRatingService;
 import com.example.ricettario.service.RecipeService;
 import com.example.ricettario.service.TagService;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/api/recipes")
@@ -53,6 +58,15 @@ public class RecipeAPIController {
         this.recipeRatingService = recipeRatingService;
         this.recipeIngredientService = recipeIngredientService;
 
+    }
+
+    @GetMapping("")
+    public ResponseEntity<Page<Recipe>> index(@RequestParam(defaultValue = "0") int page) {
+
+        Pageable pageable = PageRequest.of(page, 20, Sort.by("name").ascending());
+        Page<Recipe> recipes = recipeService.findAll(pageable);
+
+        return ResponseEntity.ok(recipes);
     }
 
     @GetMapping("/{id}")
