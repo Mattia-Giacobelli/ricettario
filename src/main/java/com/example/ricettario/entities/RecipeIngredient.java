@@ -1,9 +1,11 @@
 package com.example.ricettario.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
 @Table(name = "recipe_ingredients")
+@Data
 public class RecipeIngredient {
 
     @EmbeddedId

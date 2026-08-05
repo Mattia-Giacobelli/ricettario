@@ -1,5 +1,8 @@
 package com.example.ricettario.service;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,12 @@ public class IngredientService {
 
     }
 
+    public List<Ingredient> findAll() {
+
+        return ingredientRepository.findAll();
+
+    }
+
     public Page<Ingredient> findAll(Pageable pageable) {
 
         return ingredientRepository.findAll(pageable);
@@ -30,6 +39,10 @@ public class IngredientService {
 
         return ingredientRepository.findById(id).orElseThrow();
 
+    }
+
+    public Optional<Ingredient> findByName(String name) {
+        return ingredientRepository.findByName(name);
     }
 
     @Transactional

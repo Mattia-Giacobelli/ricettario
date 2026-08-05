@@ -32,7 +32,7 @@ public class RecipeRating {
     private Integer tasteIntensity;
 
     @Column(insertable = false, updatable = false)
-    private Integer overall;
+    private Float overall;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId

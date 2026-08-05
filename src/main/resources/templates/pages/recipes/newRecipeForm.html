@@ -14,7 +14,7 @@
 
     <link rel="stylesheet" th:href="@{/styles/style.css}">
 
-    <title>Home ricettario</title>
+    <title>Nuova Ricetta</title>
 </head>
 
 <body>
@@ -80,6 +80,50 @@
                         th:errors="*{timesPrep}"></span>
                 </div>
 
+                <!-- TAG: input libero con suggerimenti dai tag esistenti -->
+                <div class="mb-3">
+                    <label class="form-label d-block">Tag</label>
+
+                    <div class="position-relative mb-2">
+                        <input type="text" id="tagSearchInput" class="form-control" placeholder="Cerca o crea tag..."
+                            autocomplete="off" oninput="onTagSearch(this)">
+                        <div id="tagSuggestions" class="list-group position-absolute w-100"
+                            style="z-index:1000; display:none;"></div>
+                    </div>
+
+                    <div id="selectedTagsContainer" class="d-flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- INGREDIENTI: righe dinamiche -->
+                <div class="mb-3">
+                    <label>Ingredienti</label>
+                    <div id="ingredientRows"></div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addIngredientRow()">+ Aggiungi
+                        ingrediente</button>
+                </div>
+
+                <datalist id="ingredientOptions">
+                    <option th:each="ing : ${allIngredients}" th:value="${ing.name}"></option>
+                </datalist>
+
+                <!-- RATING -->
+                <fieldset class="mb-3">
+                    <legend>Valutazione (1-5)</legend>
+
+                    <label>Difficoltà</label>
+                    <input type="number" min="1" max="5" th:field="*{rating.difficulty}"><br>
+
+                    <label>Costo</label>
+                    <input type="number" min="1" max="5" th:field="*{rating.cost}"><br>
+
+                    <label>Tempo di preparazione</label>
+                    <input type="number" min="1" max="5" th:field="*{rating.prepTime}"><br>
+
+                    <label>Intensità di gusto</label>
+                    <input type="number" min="1" max="5" th:field="*{rating.tasteIntensity}"><br>
+
+                </fieldset>
+
                 <div class="text-center">
                     <button type="submit" class="btn btn-primary"
                         th:text="${recipe.id == null} ? 'Aggiungi' : 'Modifica'">
@@ -91,9 +135,135 @@
 
         </div>
 
+
+        </div>
+
     </main>
 
     <div th:replace="~{fragments/layout :: footer}"></div>
+
+    <script th:inline="javascript">
+        let rowIndex = 0;
+
+        function addIngredientRow() {
+            const container = document.getElementById('ingredientRows');
+            const div = document.createElement('div');
+            div.className = 'ingredient-row mb-2 d-flex gap-2';
+            div.innerHTML = `
+                <div class="w-25">
+                    <label>Nome</label>
+                    <input type="text" name="ingredients[${rowIndex}].name" list="ingredientOptions" placeholder="Nome ingrediente" class="form-control">
+                </div>
+                <div class="w-25">
+                    <label>Quantità</label>
+                    <input type="text" name="ingredients[${rowIndex}].quantity" placeholder="Quantità" class="form-control">
+                </div>
+                <div class="w-25">
+                    <label>Unità di misura</label>
+                    <input type="text" name="ingredients[${rowIndex}].unit" placeholder="Unità (g, ml, pz...)" class="form-control">
+                </div>
+                <div class="w-25">
+                    <label>Note</label>
+                    <input type="text" name="ingredients[${rowIndex}].notes" placeholder="Note" class="form-control">
+                </div>
+                <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">✕</button>
+            `;
+            container.appendChild(div);
+            rowIndex++;
+        }
+
+        addIngredientRow();
+    </script>
+
+    <script th:inline="javascript">
+        const availableTags = /*[[${allTags}]]*/[];
+        const selectedTags = [];
+        let tagRowIndex = 0;
+
+        function onTagSearch(input) {
+            const suggestionsBox = document.getElementById('tagSuggestions');
+            const query = input.value.trim().toLowerCase();
+
+            if (query.length === 0) {
+                suggestionsBox.style.display = 'none';
+                return;
+            }
+
+            const matches = availableTags.filter(tag =>
+                tag.name.toLowerCase().includes(query) &&
+                !selectedTags.some(sel => sel.name === tag.name)
+            );
+
+            let html = '';
+            matches.slice(0, 8).forEach(tag => {
+                html += `<button type="button" class="list-group-item list-group-item-action"
+                            onclick="selectTag(${tag.id}, '${tag.name.replace(/'/g, "\\'")}')">
+                            ${tag.name}
+                         </button>`;
+            });
+
+            const exactMatch = availableTags.some(tag => tag.name.toLowerCase() === query);
+            const alreadySelected = selectedTags.some(sel => (sel.label || '').toLowerCase() === query);
+
+            if (!exactMatch && !alreadySelected) {
+                html += `<button type="button" class="list-group-item list-group-item-action text-primary"
+                            onclick="createNewTag('${input.value.trim().replace(/'/g, "\\'")}')">
+                            + Crea nuovo tag "${input.value.trim()}"
+                         </button>`;
+            }
+
+            suggestionsBox.innerHTML = html;
+            suggestionsBox.style.display = html ? 'block' : 'none';
+        }
+
+        function selectTag(id, name) {
+            selectedTags.push({ existingId: id, name: null, label: name });
+            renderSelectedTags();
+            clearTagSearch();
+        }
+
+        function createNewTag(name) {
+            selectedTags.push({ existingId: null, name: name, label: name });
+            renderSelectedTags();
+            clearTagSearch();
+        }
+
+        function removeTag(index) {
+            selectedTags.splice(index, 1);
+            renderSelectedTags();
+        }
+
+        function clearTagSearch() {
+            document.getElementById('tagSearchInput').value = '';
+            document.getElementById('tagSuggestions').style.display = 'none';
+        }
+
+        function renderSelectedTags() {
+            const container = document.getElementById('selectedTagsContainer');
+
+            // rimuove i vecchi input hidden prima di ridisegnare
+            container.innerHTML = '';
+
+            selectedTags.forEach((tag, index) => {
+                const chip = document.createElement('span');
+                chip.className = 'badge bg-primary d-flex align-items-center gap-1 p-2';
+                chip.innerHTML = `
+                    ${tag.label}
+                    <button type="button" class="btn-close btn-close-white btn-sm" style="font-size:0.6rem;" onclick="removeTag(${index})"></button>
+                    <input type="hidden" name="tags[${index}].existingId" value="${tag.existingId ?? ''}">
+                    <input type="hidden" name="tags[${index}].name" value="${tag.name ?? ''}">
+                `;
+                container.appendChild(chip);
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#tagSearchInput') && !e.target.closest('#tagSuggestions')) {
+                document.getElementById('tagSuggestions').style.display = 'none';
+            }
+        });
+    </script>
+
 
     <!-- Bootstrap js -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"

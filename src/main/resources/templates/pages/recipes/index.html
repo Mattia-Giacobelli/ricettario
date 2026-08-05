@@ -60,7 +60,9 @@
 
                     <tr th:each="recipe: ${recipes}">
                         <th scope="row">
-                            <img class="w-50" th:src="${recipe.imageUrl}" alt="anteprima">
+                            <a th:href="@{/recipes/{id}(id=${recipe.id})}">
+                                <img class="w-50" th:src="${recipe.imageUrl}" alt="anteprima">
+                            </a>
                         </th>
                         <td th:text="${recipe.name}"></td>
                         <td th:text="${recipe.timesPrep}"></td>

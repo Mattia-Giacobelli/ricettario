@@ -13,9 +13,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Data;
 
 @Entity
 @Table(name = "poll_votes")
+@Data
 public class PollVote {
 
     @Id
@@ -33,9 +35,6 @@ public class PollVote {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
-    @Column(name = "voter_hash", length = 64)
-    private String voterHash;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

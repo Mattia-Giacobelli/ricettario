@@ -7,13 +7,13 @@ import java.util.Objects;
 @Embeddable
 public class RecipeIngredientId implements Serializable {
 
-    private Long recipeId;
-    private Long ingredientId;
+    private int recipeId;
+    private int ingredientId;
 
     public RecipeIngredientId() {
     }
 
-    public RecipeIngredientId(Long recipeId, Long ingredientId) {
+    public RecipeIngredientId(int recipeId, int ingredientId) {
         this.recipeId = recipeId;
         this.ingredientId = ingredientId;
     }

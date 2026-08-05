@@ -63,9 +63,7 @@
                 <tbody>
 
                     <tr th:each="rating: ${ratings}">
-                        <th scope="row">
-                            <img src="${rating.imageUrl}" alt="anteprima">
-                        </th>
+
                         <td th:text="${rating.recipeId}"></td>
                         <td th:text="${rating.recipe.name}"></td>
                         <td th:text="${rating.difficulty}"></td>
@@ -76,9 +74,9 @@
 
 
                         <td>
-                            <a th:href="@{/ratings/update/{id}(id=${rating.recipeId})}" class="btn btn-warning">
+                            <!-- <a th:href="@{/ratings/update/{id}(id=${rating.recipeId})}" class="btn btn-warning">
                                 <i class="bi bi-pencil"></i>
-                            </a>
+                            </a> -->
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                                 th:data-bs-target="'#deleteModal' + ${rating.recipeId}">
                                 <i class="bi bi-trash3"></i>
@@ -102,7 +100,7 @@
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary"
                                             data-bs-dismiss="modal">Annulla</button>
-                                        <form th:action="@{/ratings/{id}(id=${rating.id})}" th:method="delete">
+                                        <form th:action="@{/ratings/{id}(id=${rating.recipeId})}" th:method="delete">
                                             <button type="submit" class="btn btn-danger">Elimina</button>
                                         </form>
                                     </div>

@@ -35,9 +35,51 @@
 
                     <img th:src="@{${recipe.imageUrl}}" alt="recipe photo">
 
+                    <h4>Descrizione:</h4>
                     <p th:text="${recipe.description}"></p>
 
+                    <h4>Istruzioni:</h4>
                     <p th:text="${recipe.instructions}"></p>
+
+                    <h4>Ingredienti:</h4>
+
+                    <table class="table" th:if="${recipe.ingredients.size > 0}">
+
+                        <thead>
+
+                            <tr>
+                                <th scope="col">Nome</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr th:each="recIng: ${recipe.ingredients}">
+                                <td th:text="${recIng.ingredient.name}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Tags:</h4>
+
+                    <table class="table" th:if="${recipe.tags.size > 0}">
+
+                        <thead>
+
+                            <tr>
+                                <th scope="col">Nome</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr th:each="tag: ${recipe.tags}">
+                                <td th:text="${tag.name}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
 
                     <p
                         th:text="${recipe.timesPrep == 1} ? 'Preparata ' + ${recipe.timesPrep} + ' volta' : 'Preparata ' + ${recipe.timesPrep} + ' volte'">

@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.example.ricettario.entities.WeeklyPoll;
-import com.example.ricettario.repositories.WeeklyPollRepository;
+import com.example.ricettario.repositories.IWeeklyPollRepository;
 import com.example.ricettario.utilities.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +16,9 @@ public class WeeklyPollScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(WeeklyPollScheduler.class);
 
-    private final WeeklyPollRepository weeklyPollRepo;
+    private final IWeeklyPollRepository weeklyPollRepo;
 
-    public WeeklyPollScheduler(WeeklyPollRepository weeklyPollRepository) {
+    public WeeklyPollScheduler(IWeeklyPollRepository weeklyPollRepository) {
 
         this.weeklyPollRepo = weeklyPollRepository;
 

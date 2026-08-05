@@ -26,9 +26,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.ricettario.DTO.IngredientRowDTO;
+import com.example.ricettario.DTO.RatingDTO;
+import com.example.ricettario.DTO.RecipeFormDTO;
+import com.example.ricettario.DTO.TagRowDTO;
 import com.example.ricettario.entities.Ingredient;
 import com.example.ricettario.entities.Recipe;
+import com.example.ricettario.entities.RecipeRating;
+import com.example.ricettario.entities.Tag;
+import com.example.ricettario.service.IngredientService;
+import com.example.ricettario.service.RecipeIngredientService;
+import com.example.ricettario.service.RecipeRatingService;
 import com.example.ricettario.service.RecipeService;
+import com.example.ricettario.service.TagService;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,14 +48,23 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/recipes")
 public class RecipeController {
 
-    private RecipeService recipeService;
+    private final RecipeService recipeService;
+    private final TagService tagService;
+    private final IngredientService ingredientService;
+    private final RecipeRatingService recipeRatingService;
+    private final RecipeIngredientService recipeIngredientService;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
 
-    public RecipeController(RecipeService recipeService) {
+    public RecipeController(RecipeService recipeService, TagService tagService, IngredientService ingredientService,
+            RecipeRatingService recipeRatingService, RecipeIngredientService recipeIngredientService) {
 
         this.recipeService = recipeService;
+        this.tagService = tagService;
+        this.ingredientService = ingredientService;
+        this.recipeRatingService = recipeRatingService;
+        this.recipeIngredientService = recipeIngredientService;
 
     }
 
@@ -110,16 +130,17 @@ public class RecipeController {
     @GetMapping("/create")
     public String createForm(Model recipeM) {
 
-        Recipe newRecipe = new Recipe();
-
-        recipeM.addAttribute("recipe", newRecipe);
+        recipeM.addAttribute("recipe", new RecipeFormDTO());
+        recipeM.addAttribute("allTags", tagService.findAll());
+        recipeM.addAttribute("allIngredients", ingredientService.findAll());
 
         return "pages/recipes/newRecipeForm";
 
     }
 
     @PostMapping("/create")
-    public String create(@Validated @ModelAttribute("recipe") Recipe recipe, @RequestParam("image") MultipartFile img,
+    public String create(@Validated @ModelAttribute("recipe") RecipeFormDTO form,
+            @RequestParam("image") MultipartFile img,
             BindingResult result, RedirectAttributes red) throws IOException {
 
         if (result.hasErrors()) {
@@ -128,13 +149,62 @@ public class RecipeController {
 
         } else {
 
+            Recipe recipe = new Recipe();
+            recipe.setName(form.getName());
+            recipe.setDescription(form.getDescription());
+            recipe.setInstructions(form.getInstructions());
+            recipe.setTimesPrep(form.getTimesPrep());
+
             if (img != null && !img.isEmpty()) {
 
                 recipe.setImageUrl(saveImg(img));
 
             }
 
+            // Tags
+
+            for (TagRowDTO row : form.getTags()) {
+
+                if (row.getName() == null || row.getName().isBlank())
+                    continue;
+
+                Tag newTag = new Tag();
+                newTag.setName(row.getName().trim());
+
+                Tag tag = tagService.findByName(row.getName().trim())
+                        .orElseGet(() -> tagService.create(newTag));
+
+                recipe.getTags().add(tag);
+            }
+
             Recipe newRecipe = recipeService.create(recipe);
+
+            // Ingredients
+
+            for (IngredientRowDTO row : form.getIngredients()) {
+                if (row.getName() == null || row.getName().isBlank())
+                    continue;
+
+                Ingredient newIngredient = new Ingredient();
+                newIngredient.setName(row.getName().trim());
+
+                Ingredient ingredient = ingredientService.findByName(row.getName().trim())
+                        .orElseGet(() -> ingredientService.create(newIngredient));
+
+                recipeIngredientService.addIngredientToRecipe(
+                        newRecipe.getId(), ingredient.getId(),
+                        row.getQuantity(), row.getUnit(), row.getNotes());
+            }
+
+            // Rating
+            RatingDTO rating = form.getRating();
+            RecipeRating recipeRating = new RecipeRating();
+            recipeRating.setRecipe(newRecipe);
+            recipeRating.setDifficulty(rating.getDifficulty());
+            recipeRating.setCost(rating.getCost());
+            recipeRating.setPrepTime(rating.getPrepTime());
+            recipeRating.setTasteIntensity(rating.getTasteIntensity());
+            recipeRatingService.create(recipeRating);
 
             red.addFlashAttribute("msg", newRecipe.getName() + ", Ricetta aggiunta correttamente");
 
