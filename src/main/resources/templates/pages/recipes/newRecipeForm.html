@@ -195,9 +195,9 @@
     </script>
 
     <script th:inline="javascript">
-        const availableTags = /*[[${allTags}]]*/[];
-        const selectedTags = /*[[${recipeTags}]]*/[];
-        let tagRowIndex = 0;
+        // Garantisce che gli array siano sempre validi anche se la variabile Thymeleaf è null
+        const availableTags = /*[[${allTags}]]*/[] || [];
+        const selectedTags = /*[[${recipeTags}]]*/[] || [];
 
         function onTagSearch(input) {
             const suggestionsBox = document.getElementById('tagSuggestions');
@@ -208,25 +208,29 @@
                 return;
             }
 
+            // Filtra i tag esistenti non ancora selezionati
             const matches = availableTags.filter(tag =>
                 tag.name.toLowerCase().includes(query) &&
-                !selectedTags.some(sel => sel.name === tag.name)
+                !selectedTags.some(sel => sel.name.toLowerCase() === tag.name.toLowerCase())
             );
 
             let html = '';
             matches.slice(0, 8).forEach(tag => {
+                const safeName = tag.name.replace(/'/g, "\\'");
                 html += `<button type="button" class="list-group-item list-group-item-action"
-                            onclick="selectTag(${tag.id}, '${tag.name.replace(/'/g, "\\'")}')">
+                            onclick="selectTag(${tag.id}, '${safeName}')">
                             ${tag.name}
                          </button>`;
             });
 
             const exactMatch = availableTags.some(tag => tag.name.toLowerCase() === query);
-            const alreadySelected = selectedTags.some(sel => (sel.label || '').toLowerCase() === query);
+            const alreadySelected = selectedTags.some(sel => (sel.name || '').toLowerCase() === query);
 
+            // Se non esiste un match perfetto e non è già selezionato, mostra il pulsante di creazione
             if (!exactMatch && !alreadySelected) {
-                html += `<button type="button" class="list-group-item list-group-item-action text-primary"
-                            onclick="createNewTag('${input.value.trim().replace(/'/g, "\\'")}')">
+                const safeQuery = input.value.trim().replace(/'/g, "\\'");
+                html += `<button type="button" class="list-group-item list-group-item-action text-primary fw-bold"
+                            onclick="createNewTag('${safeQuery}')">
                             + Crea nuovo tag "${input.value.trim()}"
                          </button>`;
             }
@@ -235,14 +239,30 @@
             suggestionsBox.style.display = html ? 'block' : 'none';
         }
 
+        // Gestisce la pressione del tasto Invio nell'input dei tag
+        function onTagKeyDown(event, input) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Impedisce il submit del form
+                const query = input.value.trim();
+                if (!query) return;
+
+                const existing = availableTags.find(t => t.name.toLowerCase() === query.toLowerCase());
+                if (existing) {
+                    selectTag(existing.id, existing.name);
+                } else {
+                    createNewTag(query);
+                }
+            }
+        }
+
         function selectTag(id, name) {
-            selectedTags.push({ existingId: id, name: name, label: name });
+            selectedTags.push({ existingId: id, name: name });
             renderSelectedTags();
             clearTagSearch();
         }
 
         function createNewTag(name) {
-            selectedTags.push({ existingId: null, name: name, label: name });
+            selectedTags.push({ existingId: null, name: name });
             renderSelectedTags();
             clearTagSearch();
         }
@@ -253,21 +273,23 @@
         }
 
         function clearTagSearch() {
-            document.getElementById('tagSearchInput').value = '';
-            document.getElementById('tagSuggestions').style.display = 'none';
+            const input = document.getElementById('tagSearchInput');
+            if (input) input.value = '';
+            const suggestions = document.getElementById('tagSuggestions');
+            if (suggestions) suggestions.style.display = 'none';
         }
 
         function renderSelectedTags() {
             const container = document.getElementById('selectedTagsContainer');
+            if (!container) return;
 
-            // rimuove i vecchi input hidden prima di ridisegnare
             container.innerHTML = '';
 
             selectedTags.forEach((tag, index) => {
                 const chip = document.createElement('span');
                 chip.className = 'badge bg-primary d-flex align-items-center gap-1 p-2';
                 chip.innerHTML = `
-                    ${tag.label || tag.name}
+                    ${tag.name}
                     <button type="button" class="btn-close btn-close-white btn-sm" style="font-size:0.6rem;" onclick="removeTag(${index})"></button>
                     <input type="hidden" name="tags[${index}].existingId" value="${tag.existingId ?? ''}">
                     <input type="hidden" name="tags[${index}].name" value="${tag.name ?? ''}">
@@ -276,16 +298,17 @@
             });
         }
 
+        // Chiude il menu a tendina se si clicca fuori
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#tagSearchInput') && !e.target.closest('#tagSuggestions')) {
-                document.getElementById('tagSuggestions').style.display = 'none';
+                const suggestions = document.getElementById('tagSuggestions');
+                if (suggestions) suggestions.style.display = 'none';
             }
         });
 
-        document.addEventListener("DOMContentLoaded", (e) => {
-            renderSelectedTags()
-        })
-
+        document.addEventListener("DOMContentLoaded", () => {
+            renderSelectedTags();
+        });
     </script>
 
 
