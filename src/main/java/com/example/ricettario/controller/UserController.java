@@ -120,7 +120,7 @@ public class UserController {
     @PutMapping("/{id}")
     public String update(
             @PathVariable int id, @Validated @ModelAttribute("user") User userU, BindingResult result,
-            RedirectAttributes red, Model empModel) {
+            RedirectAttributes red, Model empModel, @AuthenticationPrincipal UserDetails userD) {
 
         boolean hasErrors = result.getFieldErrors().stream()
                 .anyMatch(error -> !error.getField().equals("user.password"));
@@ -153,7 +153,14 @@ public class UserController {
 
             }
 
-            userU.setPermission(oldUser.getPermission());
+            boolean isAdmin = userD.getAuthorities().stream()
+                    .anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
+
+            if (!isAdmin) {
+
+                userU.setPermission(oldUser.getPermission());
+
+            }
 
             userService.update(userU);
 
