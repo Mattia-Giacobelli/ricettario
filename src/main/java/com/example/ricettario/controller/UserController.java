@@ -153,8 +153,10 @@ public class UserController {
 
             }
 
+            System.out.println(userD.getAuthorities());
+
             boolean isAdmin = userD.getAuthorities().stream()
-                    .anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
+                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
 
             if (!isAdmin) {
 
