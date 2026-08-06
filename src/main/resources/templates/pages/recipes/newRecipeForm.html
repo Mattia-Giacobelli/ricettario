@@ -47,7 +47,7 @@
                     <input type="file" class="form-control" id="image" name="image" accept="image/*">
 
 
-                    <span class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+                    <span class="invalid-feedback" th:if="${#fields.hasErrors('imageUrl')}" th:errors="*{name}"></span>
                 </div>
 
                 <div class="mb-3">
@@ -101,7 +101,7 @@
                 </div>
 
                 <datalist id="ingredientOptions">
-                    <option th:each="ing : ${allIngredients}" th:value="${ing.ingredient.name}"></option>
+                    <option th:each="ing : ${allIngredients}" th:value="${ing.name}"></option>
                 </datalist>
 
                 <!-- RATING -->
