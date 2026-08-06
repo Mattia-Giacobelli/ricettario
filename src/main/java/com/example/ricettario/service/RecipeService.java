@@ -12,7 +12,7 @@ import com.example.ricettario.repositories.IRecipeRepository;
 @Transactional(readOnly = true)
 public class RecipeService {
 
-    private IRecipeRepository recipeRepository;
+    private final IRecipeRepository recipeRepository;
 
     public RecipeService(IRecipeRepository recipeRepository) {
 

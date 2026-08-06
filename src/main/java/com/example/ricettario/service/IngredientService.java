@@ -15,7 +15,7 @@ import com.example.ricettario.repositories.IIngredientRepository;
 @Transactional(readOnly = true)
 public class IngredientService {
 
-    private IIngredientRepository ingredientRepository;
+    private final IIngredientRepository ingredientRepository;
 
     public IngredientService(IIngredientRepository ingredientRepository) {
 

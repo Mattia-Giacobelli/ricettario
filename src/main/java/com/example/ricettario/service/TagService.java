@@ -15,7 +15,7 @@ import com.example.ricettario.repositories.ITagRepository;
 @Transactional(readOnly = true)
 public class TagService {
 
-    ITagRepository tagRepository;
+    private final ITagRepository tagRepository;
 
     public TagService(ITagRepository tagRepository) {
 

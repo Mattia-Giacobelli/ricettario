@@ -12,7 +12,7 @@ import com.example.ricettario.repositories.IRatingRepository;
 @Transactional(readOnly = true)
 public class RatingService {
 
-    private IRatingRepository ratingRepository;
+    private final IRatingRepository ratingRepository;
 
     public RatingService(IRatingRepository ratingRepository) {
 

@@ -135,6 +135,7 @@ public class RecipeController {
 
         recipeM.addAttribute("recipe", new RecipeFormDTO());
         recipeM.addAttribute("allTags", tagService.findAll());
+        recipeM.addAttribute("recipeTags", new ArrayList<>());
         recipeM.addAttribute("allIngredients", ingredientService.findAll());
 
         return "pages/recipes/newRecipeForm";
@@ -144,9 +145,14 @@ public class RecipeController {
     @PostMapping("/create")
     public String create(@Validated @ModelAttribute("recipe") RecipeFormDTO form,
             @RequestParam("image") MultipartFile img,
-            BindingResult result, RedirectAttributes red) throws IOException {
+            BindingResult result, RedirectAttributes red, Model recipeM) throws IOException {
 
         if (result.hasErrors()) {
+
+            recipeM.addAttribute("recipe", new RecipeFormDTO());
+            recipeM.addAttribute("allTags", tagService.findAll());
+            recipeM.addAttribute("recipeTags", new ArrayList<>());
+            recipeM.addAttribute("allIngredients", ingredientService.findAll());
 
             return "pages/recipes/newRecipeForm";
 

@@ -23,7 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/ratings")
 public class RatingController {
 
-    private RatingService ratingService;
+    private final RatingService ratingService;
 
     public RatingController(RatingService ratingService) {
 

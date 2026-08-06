@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/tags")
 public class TagController {
 
-    TagService tagService;
+    private final TagService tagService;
 
     public TagController(TagService tagService) {
 
