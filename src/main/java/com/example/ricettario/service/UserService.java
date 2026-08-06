@@ -52,6 +52,13 @@ public class UserService {
 
     }
 
+    @Transactional
+    public void delete(int id) {
+
+        userRepository.deleteById(id);
+
+    }
+
     // Utility
 
     public boolean existsByUsername(String username) {
