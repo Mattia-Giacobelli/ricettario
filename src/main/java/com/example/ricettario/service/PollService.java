@@ -33,10 +33,17 @@ public class PollService {
 
     public WeeklyPoll getActivePoll() {
 
-        LocalDate weekStart = LocalDate.now();
-        LocalDate weekEnd = weekStart.plusDays(6);
+        LocalDate today = LocalDate.now();
 
-        return pollRepository.findByWeekStartAndWeekEnd(weekStart, weekEnd).orElseThrow();
+        return pollRepository.findPollContainingDate(today).orElseThrow(
+                () -> new RuntimeException("Nessun poll attivo per oggi"));
+
+    }
+
+    public WeeklyPoll getLastPoll() {
+
+        return pollRepository.findTopByStatusOrderByWeekEndDesc(Status.CLOSED).orElseThrow(
+                () -> new RuntimeException("Nessun poll attivo per oggi"));
 
     }
 

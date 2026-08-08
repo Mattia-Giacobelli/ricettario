@@ -28,7 +28,7 @@ public class WeeklyPollScheduler {
     public void createWeeklyPoll() {
 
         LocalDate weekStart = LocalDate.now();
-        LocalDate weekEnd = weekStart.plusDays(6);
+        LocalDate weekEnd = weekStart.plusDays(4);
 
         boolean exists = weeklyPollRepo.existsByWeekStartAndWeekEnd(weekStart, weekEnd);
 
@@ -45,6 +45,18 @@ public class WeeklyPollScheduler {
         poll.setWeekStart(weekStart);
         poll.setWeekEnd(weekEnd);
         poll.setStatus(Status.OPEN);
+
+        weeklyPollRepo.save(poll);
+
+    }
+
+    @Scheduled(cron = "0 59 23 * * FRI")
+    public void closeWeeklyPoll() {
+
+        WeeklyPoll poll = weeklyPollRepo.findByStatus(Status.OPEN)
+                .orElseThrow(() -> new RuntimeException("Nessun poll aperto da chiudere"));
+
+        poll.setStatus(Status.CLOSED);
 
         weeklyPollRepo.save(poll);
 

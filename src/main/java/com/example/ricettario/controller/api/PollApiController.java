@@ -69,6 +69,7 @@ public class PollApiController {
             newPoll.setWeekStart(poll.getWeekStart());
             newPoll.setWeekEnd(poll.getWeekEnd());
             newPoll.setCandidates(candidateDTOs);
+            newPoll.setWinningRecipe(poll.getWinningRecipe());
 
             return ResponseEntity.ok(newPoll);
 

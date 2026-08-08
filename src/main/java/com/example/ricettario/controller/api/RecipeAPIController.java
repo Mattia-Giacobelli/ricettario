@@ -60,13 +60,50 @@ public class RecipeAPIController {
 
     }
 
+    // Populate dto
+
+    private RecipeResponseDTO toResponseDTO(Recipe recipe) {
+
+        RecipeResponseDTO dto = new RecipeResponseDTO();
+        dto.setId(recipe.getId());
+        dto.setName(recipe.getName());
+        dto.setDescription(recipe.getDescription());
+        dto.setInstructions(recipe.getInstructions());
+        dto.setImageUrl(recipe.getImageUrl());
+
+        dto.setTags(recipe.getTags().stream()
+                .map(Tag::getName)
+                .collect(Collectors.toList()));
+
+        List<IngredientResponseDTO> ingredientDTOs = recipe.getIngredients().stream()
+                .map(ri -> new IngredientResponseDTO(
+                        ri.getIngredient().getName(),
+                        ri.getQuantity(),
+                        ri.getUnit(),
+                        ri.getNotes()))
+                .collect(Collectors.toList());
+        dto.setIngredients(ingredientDTOs);
+
+        if (recipe.getRating() != null) {
+            RatingResponseDTO ratingDTO = new RatingResponseDTO();
+            ratingDTO.setDifficulty(recipe.getRating().getDifficulty());
+            ratingDTO.setCost(recipe.getRating().getCost());
+            ratingDTO.setPrepTime(recipe.getRating().getPrepTime());
+            ratingDTO.setTasteIntensity(recipe.getRating().getTasteIntensity());
+            ratingDTO.setOverall(recipe.getRating().getOverall());
+            dto.setRating(ratingDTO);
+        }
+
+        return dto;
+    }
+
     @GetMapping("")
-    public ResponseEntity<Page<Recipe>> index(@RequestParam(defaultValue = "0") int page) {
+    public ResponseEntity<Page<RecipeResponseDTO>> index(@RequestParam(defaultValue = "0") int page) {
 
         Pageable pageable = PageRequest.of(page, 20, Sort.by("name").ascending());
         Page<Recipe> recipes = recipeService.findAll(pageable);
 
-        return ResponseEntity.ok(recipes);
+        return ResponseEntity.ok(recipes.map(this::toResponseDTO));
     }
 
     @GetMapping("/{id}")

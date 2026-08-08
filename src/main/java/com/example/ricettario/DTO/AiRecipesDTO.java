@@ -1,12 +1,15 @@
 package com.example.ricettario.DTO;
 
+import java.util.ArrayList;
 import java.util.List;
+
 
 public class AiRecipesDTO {
 
     private String name;
     private String description;
-    private List<String> tags;
+    private List<String> tags = new ArrayList<>();
+    private Integer difficulty;
 
     public String getName() {
 
@@ -41,6 +44,18 @@ public class AiRecipesDTO {
     public void setTags(List<String> tags) {
 
         this.tags = tags;
+
+    }
+
+    public Integer getdifficulty() {
+
+        return difficulty;
+
+    }
+
+    public void setdifficulty(Integer difficulty) {
+
+        this.difficulty = difficulty;
 
     }
 

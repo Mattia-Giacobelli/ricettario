@@ -3,12 +3,15 @@ package com.example.ricettario.DTO;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.example.ricettario.entities.Recipe;
+
 public class ActivePollResponseDTO {
 
     private Integer pollId;
     private LocalDate weekStart;
     private LocalDate weekEnd;
     private List<CandidateResponseDTO> candidates;
+    private Recipe winningRecipe;
 
     public Integer getPollId() {
         return pollId;
@@ -41,4 +44,13 @@ public class ActivePollResponseDTO {
     public void setCandidates(List<CandidateResponseDTO> candidates) {
         this.candidates = candidates;
     }
+
+    public Recipe getWinningRecipe() {
+        return winningRecipe;
+    }
+
+    public void setWinningRecipe(Recipe winningRecipe) {
+        this.winningRecipe = winningRecipe;
+    }
+
 }

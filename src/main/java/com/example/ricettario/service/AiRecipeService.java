@@ -40,20 +40,21 @@ public class AiRecipeService {
     private String buildPrompt(RecipeSuggestionRequestDTO request) {
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Scegli esattamente 5 ricette di cucina che rispettino questi criteri:\n");
+        sb.append(
+                "Scegli da 1 a 5, il più possibile, ricette di cucina che rispettino questi criteri o almeno simili:\n");
 
         if (request.getPreferredTags() != null && !request.getPreferredTags().isEmpty()) {
             sb.append("- Tag/categorie preferite: ")
                     .append(String.join(", ", request.getPreferredTags())).append("\n");
         }
         if (request.getDifficulty() != null) {
-            sb.append("- Difficoltà: ").append(request.getDifficulty()).append("\n");
-        }
-        if (request.getMaxPrepTime() != null) {
-            sb.append("- Tempo di preparazione massimo: ").append(request.getMaxPrepTime()).append(" ore\n");
+            sb.append("- Difficoltà da 1 'facile' a 5 'molto difficile': ").append(request.getDifficulty())
+                    .append("\n");
         }
 
         List<Recipe> recipes = recipeService.findAll();
+
+        System.out.println("Ricette recuperate da DB: " + recipes.size());
         List<AiRecipesDTO> aiRecipes = new ArrayList<>();
 
         recipes.stream().forEach(recipe -> {
@@ -69,23 +70,48 @@ public class AiRecipeService {
                 newReqRecipe.getTags().add(tagS);
 
             });
+            newReqRecipe.setdifficulty(recipe.getRating().getDifficulty());
+
+            aiRecipes.add(newReqRecipe);
 
         });
 
+        System.out.println("Ricette aggiunte al dto: " + aiRecipes.size() + aiRecipes.getFirst().getName());
+
         sb.append("La scelta va fatta tra queste ricette:");
 
-        sb.append(aiRecipes);
+        ObjectMapper objMapper = new ObjectMapper();
 
-        sb.append("""
+        try {
 
-                Rispondi ESCLUSIVAMENTE con un array JSON valido, senza testo aggiuntivo, senza markdown, \
-                nel seguente formato esatto:
-                [
-                  {
-                    "name": "Nome ricetta",
-                  }
-                ]
-                """);
+            String recipesJSON = objMapper.writeValueAsString(aiRecipes);
+
+            sb.append(recipesJSON);
+
+        } catch (Exception e) {
+
+            throw new RuntimeException("Errore nel parsing delle ricette: " + e.getMessage(), e);
+
+        }
+
+        sb.append(
+                """
+
+                        Rispondi ESCLUSIVAMENTE con un array JSON valido, senza testo aggiuntivo, senza markdown, \
+                        nel seguente formato esatto:
+                        [
+                            {
+                                "name": "Nome ricetta"
+                            }
+                        ]
+                        Se invece riscontri errori o l'array è vuoto spiegami il motivo e l'errore ESCLUSIVAMENTE con un array JSON valido, senza testo aggiuntivo, senza markdown, \
+                        nel seguente formato esatto:
+                        [
+                            {
+                                "error": "errore spiegato in breve"
+                            }
+                        ]
+                        """);
 
         return sb.toString();
     }
