@@ -78,6 +78,36 @@ public class PollApiController {
         }
     }
 
+    @GetMapping("/last-poll")
+    public ResponseEntity<ActivePollResponseDTO> getLastPoll() {
+        try {
+            WeeklyPoll poll = pollService.getActivePoll();
+
+            List<PollCandidate> pollCandidates = candidateService.findByPoll_Id(poll.getId());
+
+            List<CandidateResponseDTO> candidateDTOs = pollCandidates.stream()
+                    .map(c -> new CandidateResponseDTO(
+                            c.getId(),
+                            c.getRecipe().getId(),
+                            c.getRecipe().getName(),
+                            c.getRecipe().getImageUrl(),
+                            voteService.countByCandidate_Id(c.getId())))
+                    .collect(Collectors.toList());
+
+            ActivePollResponseDTO newPoll = new ActivePollResponseDTO();
+            newPoll.setPollId(poll.getId());
+            newPoll.setWeekStart(poll.getWeekStart());
+            newPoll.setWeekEnd(poll.getWeekEnd());
+            newPoll.setCandidates(candidateDTOs);
+            newPoll.setWinningRecipe(poll.getWinningRecipe());
+
+            return ResponseEntity.ok(newPoll);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @PostMapping("/{pollId}/vote")
     public ResponseEntity<String> vote(@PathVariable Integer pollId,
             @RequestBody VoteRequestDTO voteRequest,
