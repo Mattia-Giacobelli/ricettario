@@ -1,15 +1,10 @@
 package com.example.ricettario.scheduler;
 
 import java.time.LocalDate;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.example.ricettario.entities.PollCandidate;
-import com.example.ricettario.entities.PollVote;
 import com.example.ricettario.entities.Recipe;
 import com.example.ricettario.entities.WeeklyPoll;
 import com.example.ricettario.repositories.IWeeklyPollRepository;
@@ -50,7 +45,7 @@ public class WeeklyPollScheduler {
         WeeklyPoll poll = new WeeklyPoll();
         poll.setWeekStart(weekStart);
         poll.setWeekEnd(weekEnd);
-        poll.setStatus(Status.OPEN);
+        poll.setStatus(Status.open);
 
         weeklyPollRepo.save(poll);
 
@@ -64,17 +59,7 @@ public class WeeklyPollScheduler {
 
         poll.setStatus(Status.closed);
 
-        Optional<Map.Entry<PollCandidate, Long>> winner = poll.getVotes().stream()
-                .collect(Collectors.groupingBy(PollVote::getCandidate, Collectors.counting()))
-                .entrySet().stream()
-                .max(Map.Entry.comparingByValue());
-
-        if (winner.isPresent()) {
-
-            poll.setWinningRecipe(winner.get().getKey().getRecipe());
-            weeklyPollRepo.save(poll);
-
-        }
+        Recipe winning;
 
         weeklyPollRepo.save(poll);
 
