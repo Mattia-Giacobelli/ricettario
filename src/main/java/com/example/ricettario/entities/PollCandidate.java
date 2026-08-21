@@ -25,9 +25,13 @@ public class PollCandidate {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "poll_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private WeeklyPoll poll;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Recipe recipe;
 }

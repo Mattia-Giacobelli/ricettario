@@ -2,7 +2,9 @@ package com.example.ricettario.DTO;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
+import com.example.ricettario.entities.PollSuggestion;
 import com.example.ricettario.entities.Recipe;
 
 public class ActivePollResponseDTO {
@@ -11,6 +13,7 @@ public class ActivePollResponseDTO {
     private LocalDate weekStart;
     private LocalDate weekEnd;
     private List<CandidateResponseDTO> candidates;
+    private Set<PollSuggestion> suggestions;
     private Recipe winningRecipe;
 
     public Integer getPollId() {
@@ -51,6 +54,14 @@ public class ActivePollResponseDTO {
 
     public void setWinningRecipe(Recipe winningRecipe) {
         this.winningRecipe = winningRecipe;
+    }
+
+    public Set<PollSuggestion> getSuggestions() {
+        return suggestions;
+    }
+
+    public void setSuggestions(Set<PollSuggestion> suggestions) {
+        this.suggestions = suggestions;
     }
 
 }

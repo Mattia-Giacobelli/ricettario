@@ -60,8 +60,6 @@ public class RecipeAPIController {
 
     }
 
-    // Populate dto
-
     private RecipeResponseDTO toResponseDTO(Recipe recipe) {
 
         RecipeResponseDTO dto = new RecipeResponseDTO();
@@ -106,6 +104,14 @@ public class RecipeAPIController {
         return ResponseEntity.ok(recipes.map(this::toResponseDTO));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<RecipeResponseDTO>> indexAll() {
+
+        List<Recipe> recipes = recipeService.findAll();
+
+        return ResponseEntity.ok(recipes.stream().map(this::toResponseDTO).collect(Collectors.toList()));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<RecipeResponseDTO> show(@PathVariable int id) {
 
@@ -121,12 +127,10 @@ public class RecipeAPIController {
         dto.setInstructions(recipe.getInstructions());
         dto.setImageUrl(recipe.getImageUrl());
 
-        // Tags: solo i nomi, niente riferimenti circolari
         dto.setTags(recipe.getTags().stream()
                 .map(Tag::getName)
                 .collect(Collectors.toList()));
 
-        // Ingredienti: nome + quantità/unità/note
         List<IngredientResponseDTO> ingredientDTOs = recipeIngredientService
                 .getIngredientsForRecipe(recipe.getId())
                 .stream()
@@ -138,7 +142,6 @@ public class RecipeAPIController {
                 .collect(Collectors.toList());
         dto.setIngredients(ingredientDTOs);
 
-        // Rating
         RecipeRating rating = recipeRatingService.findByRecipeId(recipe.getId());
         if (rating != null) {
             RatingResponseDTO ratingDTO = new RatingResponseDTO();

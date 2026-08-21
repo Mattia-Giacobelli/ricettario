@@ -33,16 +33,14 @@ public class PollService {
 
     public WeeklyPoll getActivePoll() {
 
-        LocalDate today = LocalDate.now();
-
-        return pollRepository.findPollContainingDate(today).orElseThrow(
+        return pollRepository.findTopByStatusOrderByWeekEndDesc(Status.open).orElseThrow(
                 () -> new RuntimeException("Nessun poll attivo per oggi"));
 
     }
 
     public WeeklyPoll getLastPoll() {
 
-        return pollRepository.findTopByStatusOrderByWeekEndDesc(Status.CLOSED).orElseThrow(
+        return pollRepository.findTopByStatusOrderByWeekEndDesc(Status.closed).orElseThrow(
                 () -> new RuntimeException("Nessun poll attivo per oggi"));
 
     }
@@ -53,7 +51,7 @@ public class PollService {
         WeeklyPoll poll = pollRepository.findById(pollId)
                 .orElseThrow(() -> new RuntimeException("Poll non trovato: " + pollId));
 
-        if (poll.getStatus() != Status.OPEN) {
+        if (poll.getStatus() != Status.open) {
             throw new IllegalStateException("Il poll non è più attivo");
         }
 
@@ -77,6 +75,11 @@ public class PollService {
         vote.setUser(user);
 
         voteRepository.save(vote);
+    }
+
+    @Transactional
+    public WeeklyPoll update(WeeklyPoll poll) {
+        return pollRepository.save(poll);
     }
 
 }

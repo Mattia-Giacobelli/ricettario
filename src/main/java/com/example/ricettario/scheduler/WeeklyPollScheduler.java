@@ -1,10 +1,16 @@
 package com.example.ricettario.scheduler;
 
 import java.time.LocalDate;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.example.ricettario.entities.PollCandidate;
+import com.example.ricettario.entities.PollVote;
+import com.example.ricettario.entities.Recipe;
 import com.example.ricettario.entities.WeeklyPoll;
 import com.example.ricettario.repositories.IWeeklyPollRepository;
 import com.example.ricettario.utilities.Status;
@@ -53,10 +59,22 @@ public class WeeklyPollScheduler {
     @Scheduled(cron = "0 59 23 * * FRI")
     public void closeWeeklyPoll() {
 
-        WeeklyPoll poll = weeklyPollRepo.findByStatus(Status.OPEN)
+        WeeklyPoll poll = weeklyPollRepo.findByStatus(Status.open)
                 .orElseThrow(() -> new RuntimeException("Nessun poll aperto da chiudere"));
 
-        poll.setStatus(Status.CLOSED);
+        poll.setStatus(Status.closed);
+
+        Optional<Map.Entry<PollCandidate, Long>> winner = poll.getVotes().stream()
+                .collect(Collectors.groupingBy(PollVote::getCandidate, Collectors.counting()))
+                .entrySet().stream()
+                .max(Map.Entry.comparingByValue());
+
+        if (winner.isPresent()) {
+
+            poll.setWinningRecipe(winner.get().getKey().getRecipe());
+            weeklyPollRepo.save(poll);
+
+        }
 
         weeklyPollRepo.save(poll);
 

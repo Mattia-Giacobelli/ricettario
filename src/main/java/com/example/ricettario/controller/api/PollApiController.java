@@ -5,19 +5,23 @@ import com.example.ricettario.DTO.AddRecipeRequestDTO;
 import com.example.ricettario.DTO.CandidateResponseDTO;
 import com.example.ricettario.DTO.VoteRequestDTO;
 import com.example.ricettario.entities.PollCandidate;
+import com.example.ricettario.entities.PollVote;
 import com.example.ricettario.entities.Recipe;
 import com.example.ricettario.entities.User;
 import com.example.ricettario.entities.WeeklyPoll;
+import com.example.ricettario.repositories.IWeeklyPollRepository;
 import com.example.ricettario.service.CandidateService;
 import com.example.ricettario.service.PollService;
 import com.example.ricettario.service.RecipeService;
 import com.example.ricettario.service.UserService;
 import com.example.ricettario.service.VoteService;
+import com.example.ricettario.utilities.Status;
 
 import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -70,6 +74,7 @@ public class PollApiController {
             newPoll.setWeekEnd(poll.getWeekEnd());
             newPoll.setCandidates(candidateDTOs);
             newPoll.setWinningRecipe(poll.getWinningRecipe());
+            newPoll.setSuggestions(poll.getSuggestions());
 
             return ResponseEntity.ok(newPoll);
 
@@ -110,15 +115,13 @@ public class PollApiController {
 
     @PostMapping("/{pollId}/vote")
     public ResponseEntity<String> vote(@PathVariable Integer pollId,
-            @RequestBody VoteRequestDTO voteRequest,
-            Authentication authentication) {
+            @RequestBody VoteRequestDTO voteRequest) {
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Devi effettuare il login per votare");
+        User user = userService.findByUsername(voteRequest.getUsername());
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non trovato");
         }
-
-        String username = authentication.getName();
-        User user = userService.findByUsername(username);
 
         try {
             pollService.vote(pollId, voteRequest.getCandidateId(), user.getId());
@@ -136,8 +139,6 @@ public class PollApiController {
             @PathVariable Integer pollId,
             @Valid @RequestBody AddRecipeRequestDTO candidates) {
 
-        // Check poll
-
         WeeklyPoll poll = pollService.getActivePoll();
 
         if (poll == null) {
@@ -147,7 +148,6 @@ public class PollApiController {
 
         }
 
-        // Check recipe
         Recipe recipe = recipeService.findById(candidates.getRecipeId());
 
         if (recipe == null) {
@@ -157,16 +157,12 @@ public class PollApiController {
 
         }
 
-        // Check duplicates
-
         if (candidateService.existsByPollIdAndRecipeId(pollId, candidates.getRecipeId())) {
 
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("message", "La ricetta è già stata aggiunta a questo sondaggio"));
 
         }
-
-        // Save recipe
 
         PollCandidate candidate = new PollCandidate();
         candidate.setPoll(poll);
@@ -184,8 +180,6 @@ public class PollApiController {
     public ResponseEntity<?> updateRecipe(@PathVariable Integer pollId,
             @Valid @RequestBody AddRecipeRequestDTO candidates) {
 
-        // Check poll
-
         WeeklyPoll poll = pollService.getActivePoll();
 
         if (poll == null) {
@@ -195,7 +189,6 @@ public class PollApiController {
 
         }
 
-        // Check recipe
         Recipe recipe = recipeService.findById(candidates.getRecipeId());
 
         if (recipe == null) {
@@ -205,16 +198,12 @@ public class PollApiController {
 
         }
 
-        // Check duplicates
-
         if (candidateService.existsByPollIdAndRecipeId(pollId, candidates.getRecipeId())) {
 
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("message", "La ricetta è già stata aggiunta a questo sondaggio"));
 
         }
-
-        // Save recipe
 
         PollCandidate candidate = candidateService.findByPollIdAndRecipeId(pollId, pollId);
         candidateService.delete(candidate);
@@ -226,5 +215,12 @@ public class PollApiController {
                 "message", "Ricetta rimossa con successo dal sondaggio"));
 
     }
+
+    // @GetMapping("/votetest")
+    // public ResponseEntity<?> getVoteTest() {
+
+    // return ResponseEntity.ok("Test");
+
+    // }
 
 }
