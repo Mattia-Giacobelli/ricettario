@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.ricettario.DTO.UserApiDTO;
+import com.example.ricettario.DTO.UserApiLoginDTO;
 import com.example.ricettario.DTO.UserApiResponseDTO;
 import com.example.ricettario.entities.Permission;
 import com.example.ricettario.entities.User;
@@ -61,7 +62,7 @@ public class ApiAuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserApiDTO userDTO) {
+    public ResponseEntity<?> login(@RequestBody UserApiLoginDTO userDTO) {
 
         if (!userService.existsByUsername(userDTO.getUsername())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non trovato");
