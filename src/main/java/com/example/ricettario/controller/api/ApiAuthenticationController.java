@@ -13,83 +13,73 @@ import com.example.ricettario.DTO.UserApiDTO;
 import com.example.ricettario.DTO.UserApiResponseDTO;
 import com.example.ricettario.entities.Permission;
 import com.example.ricettario.entities.User;
+import com.example.ricettario.security.JwtUtil;
 import com.example.ricettario.service.PermissionService;
 import com.example.ricettario.service.UserService;
 import com.example.ricettario.utilities.PermissionType;
 
 @RestController
-@RequestMapping("/ricettario")
+@RequestMapping("/api/auth")
 public class ApiAuthenticationController {
 
     private final BCryptPasswordEncoder passwordEncoder;
     private final UserService userService;
     private final PermissionService permissionService;
+    private final JwtUtil jwtUtil;
 
     public ApiAuthenticationController(UserService userService, BCryptPasswordEncoder passwordEncoder,
-            PermissionService permissionService) {
+            PermissionService permissionService, JwtUtil jwtUtil) {
 
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.permissionService = permissionService;
+        this.jwtUtil = jwtUtil;
 
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserApiDTO userDTO) {
 
-        User user = new User();
+        if (userService.existsByUsername(userDTO.getUsername())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username già in uso");
+        }
+        if (userService.existsByEmail(userDTO.getEmail())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email già in uso");
+        }
 
+        User user = new User();
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
-
-        // Controllo unicità username/email (oltre al vincolo UNIQUE nel DB)
-        if (userService.existsByUsername(user.getUsername())) {
-            return ResponseEntity.status(HttpStatus.IM_USED).body("Username già in uso");
-        }
-        if (userService.existsByEmail(user.getEmail())) {
-            return ResponseEntity.status(HttpStatus.IM_USED).body("Username già in uso");
-        }
-
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // hash corretto, una sola volta
 
         Permission userPermission = permissionService.findByType(PermissionType.USER);
         user.setPermission(userPermission);
 
         userService.create(user);
 
-        return ResponseEntity.ok("Utente registrato con successo");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Utente registrato con successo");
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserApiDTO userDTO) {
 
-        User user;
-
-        if (userService.existsByUsername(userDTO.getUsername())) {
-
-            user = userService.findByUsername(userDTO.getUsername());
-
-            userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-
-            if (user.getPassword().equals(userDTO.getPassword())) {
-
-                UserApiResponseDTO resUser = new UserApiResponseDTO();
-
-                resUser.setUsername(user.getUsername());
-                resUser.setPermission(user.getPermission().getPermissionType().toString());
-
-                ResponseEntity.status(HttpStatus.ACCEPTED).body(resUser);
-
-            } else {
-
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Password errata");
-
-            }
-
+        if (!userService.existsByUsername(userDTO.getUsername())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non trovato");
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non trovato");
+        User user = userService.findByUsername(userDTO.getUsername());
 
+        // matches() confronta la password in chiaro con l'hash salvato,
+        // gestendo da solo il salt -- MAI ri-hashare la password in ingresso.
+        if (!passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Password errata");
+        }
+
+        String permission = user.getPermission().getPermissionType().toString();
+        String token = jwtUtil.generateToken(user.getUsername(), permission);
+
+        UserApiResponseDTO response = new UserApiResponseDTO(token, user.getUsername(), permission);
+
+        return ResponseEntity.ok(response); // <-- return presente, a differenza di prima
     }
-
 }

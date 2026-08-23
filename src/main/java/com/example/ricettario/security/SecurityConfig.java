@@ -4,42 +4,65 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtAuthFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
-    public SecurityConfig(AuthenticationProvider authenticationProvider) {
+    public SecurityConfig(AuthenticationProvider authenticationProvider, JwtAuthFilter jwtAuthFilter) {
         this.authenticationProvider = authenticationProvider;
+        this.jwtAuthFilter = jwtAuthFilter;
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
+    @Order(1)
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1. Gestione CORS per chiamate da React
+                .securityMatcher("/api/**") // <-- questa catena vale solo per /api/**
+
+                .csrf(csrf -> csrf.disable()) // niente sessione -> niente bisogno di CSRF token
                 .cors(Customizer.withDefaults())
 
-                // 2. Disabilita CSRF per tutte le API REST
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // 3. Autorizzazioni rotte
                 .authorizeHttpRequests(auth -> auth
-                        // Sblocca le richieste OPTIONS (CORS preflight) inviate da Axios/React
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/", "/login", "/users/register", "/css/**", "/js/**", "/api/**", "/error")
-                        .permitAll()
+                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                        .requestMatchers("/api/recipes/**").permitAll()
+                        .requestMatchers("/api/polls/active", "/api/polls/last-poll").permitAll()
+                        .anyRequest().authenticated())
+
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> response
+                                .setStatus(HttpStatus.UNAUTHORIZED.value())));
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)
+    public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(Customizer.withDefaults()) // qui la sessione c'è, quindi CSRF va tenuto attivo
+
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/login", "/users/register", "/css/**", "/js/**", "/error").permitAll()
                         .requestMatchers("/home/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/ingredients/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/recipies", "/recipies/**").hasAnyRole("USER", "ADMIN")
@@ -48,24 +71,13 @@ public class SecurityConfig {
                         .requestMatchers("/user", "/user/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated())
 
-                // 4. UNICO BLOCCO EXCEPTION HANDLING (Rimuovi qualsiasi altro
-                // .exceptionHandling in fondo)
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            if (request.getRequestURI().startsWith("/api/")) {
-                                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                            } else {
-                                response.sendRedirect("/login");
-                            }
-                        })
-                        .accessDeniedPage("/access-denied"))
-
-                // 5. Provider e Form Login per Thymeleaf
                 .authenticationProvider(authenticationProvider)
 
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(
-                                org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> response.sendRedirect("/login"))
+                        .accessDeniedPage("/access-denied"))
 
                 .formLogin(form -> form
                         .loginPage("/login").permitAll()
@@ -74,7 +86,6 @@ public class SecurityConfig {
                         .successHandler(roleBasedSuccessHandler())
                         .failureUrl("/login?error"))
 
-                // 6. Logout
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .invalidateHttpSession(true)

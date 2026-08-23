@@ -5,29 +5,24 @@ import com.example.ricettario.DTO.AddRecipeRequestDTO;
 import com.example.ricettario.DTO.CandidateResponseDTO;
 import com.example.ricettario.DTO.VoteRequestDTO;
 import com.example.ricettario.entities.PollCandidate;
-import com.example.ricettario.entities.PollVote;
 import com.example.ricettario.entities.Recipe;
 import com.example.ricettario.entities.User;
 import com.example.ricettario.entities.WeeklyPoll;
-import com.example.ricettario.repositories.IWeeklyPollRepository;
 import com.example.ricettario.service.CandidateService;
 import com.example.ricettario.service.PollService;
 import com.example.ricettario.service.RecipeService;
 import com.example.ricettario.service.UserService;
 import com.example.ricettario.service.VoteService;
-import com.example.ricettario.utilities.Status;
 
 import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -113,6 +108,7 @@ public class PollApiController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{pollId}/vote")
     public ResponseEntity<String> vote(@PathVariable Integer pollId,
             @RequestBody VoteRequestDTO voteRequest) {
@@ -134,6 +130,7 @@ public class PollApiController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{pollId}/addrecipe")
     public ResponseEntity<?> addRecipeToPoll(
             @PathVariable Integer pollId,
@@ -176,6 +173,7 @@ public class PollApiController {
                 "message", "Ricetta aggiunta con successo al sondaggio"));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{pollID}/deleterecipe")
     public ResponseEntity<?> updateRecipe(@PathVariable Integer pollId,
             @Valid @RequestBody AddRecipeRequestDTO candidates) {
