@@ -13,8 +13,8 @@ public class ActivePollResponseDTO {
     private LocalDate weekStart;
     private LocalDate weekEnd;
     private List<CandidateResponseDTO> candidates;
-    private Set<PollSuggestion> suggestions;
-    private Recipe winningRecipe;
+    private List<SuggestionResponseDTO> suggestions;
+    private WinnerResponseDTO winningRecipe;
 
     public Integer getPollId() {
         return pollId;
@@ -48,19 +48,19 @@ public class ActivePollResponseDTO {
         this.candidates = candidates;
     }
 
-    public Recipe getWinningRecipe() {
+    public WinnerResponseDTO getWinningRecipe() {
         return winningRecipe;
     }
 
-    public void setWinningRecipe(Recipe winningRecipe) {
+    public void setWinningRecipe(WinnerResponseDTO winningRecipe) {
         this.winningRecipe = winningRecipe;
     }
 
-    public Set<PollSuggestion> getSuggestions() {
+    public List<SuggestionResponseDTO> getSuggestions() {
         return suggestions;
     }
 
-    public void setSuggestions(Set<PollSuggestion> suggestions) {
+    public void setSuggestions(List<SuggestionResponseDTO> suggestions) {
         this.suggestions = suggestions;
     }
 

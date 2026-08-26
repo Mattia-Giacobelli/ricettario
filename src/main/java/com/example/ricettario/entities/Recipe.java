@@ -63,16 +63,24 @@ public class Recipe {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<RecipeIngredient> ingredients = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(name = "recipe_tags", joinColumns = @JoinColumn(name = "recipe_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Tag> tags = new HashSet<>();
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<PollCandidate> pollCandidates = new ArrayList<>();
 
     @OneToMany(mappedBy = "winningRecipe")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<WeeklyPoll> wonPolls = new ArrayList<>();
 
     @OneToOne(mappedBy = "recipe", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

@@ -9,6 +9,8 @@ import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -37,6 +39,8 @@ public class RecipeRating {
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "recipe_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Recipe recipe;
 
 }

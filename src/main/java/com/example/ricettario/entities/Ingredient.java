@@ -33,5 +33,7 @@ public class Ingredient {
     private String name;
 
     @OneToMany(mappedBy = "ingredient")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<RecipeIngredient> recipes = new ArrayList<>();
 }

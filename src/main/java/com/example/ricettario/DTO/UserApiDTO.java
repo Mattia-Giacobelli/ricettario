@@ -1,12 +1,10 @@
 package com.example.ricettario.DTO;
 
-import com.example.ricettario.entities.Permission;
-
 public class UserApiDTO {
 
     private String username;
     private String email;
-    private Permission permission;
+    private String permission;
     private String password;
 
     public String getUsername() {
@@ -25,11 +23,11 @@ public class UserApiDTO {
         this.email = email;
     }
 
-    public Permission getPermission() {
+    public String getPermission() {
         return permission;
     }
 
-    public void setPermission(Permission permission) {
+    public void setPermission(String permission) {
         this.permission = permission;
     }
 

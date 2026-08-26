@@ -34,4 +34,5 @@ public class PollCandidate {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Recipe recipe;
+
 }
