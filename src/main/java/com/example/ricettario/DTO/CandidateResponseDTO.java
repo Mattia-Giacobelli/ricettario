@@ -7,16 +7,14 @@ public class CandidateResponseDTO {
     private String recipeName;
     private String recipeImageUrl;
     private Integer voteCount;
-    private String username;
 
     public CandidateResponseDTO(Integer candidateId, Integer recipeId, String recipeName,
-            String recipeImageUrl, Integer voteCount, String username) {
+            String recipeImageUrl, Integer voteCount) {
         this.candidateId = candidateId;
         this.recipeId = recipeId;
         this.recipeName = recipeName;
         this.recipeImageUrl = recipeImageUrl;
         this.voteCount = voteCount;
-        this.username = username;
     }
 
     public Integer getCandidateId() {
@@ -59,11 +57,4 @@ public class CandidateResponseDTO {
         this.voteCount = voteCount;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getUsername() {
-        return username;
-    }
 }

@@ -5,6 +5,7 @@ import com.example.ricettario.DTO.AddRecipeRequestDTO;
 import com.example.ricettario.DTO.CandidateResponseDTO;
 import com.example.ricettario.DTO.SuggestionResponseDTO;
 import com.example.ricettario.DTO.VoteRequestDTO;
+import com.example.ricettario.DTO.VoteResponseDTO;
 import com.example.ricettario.DTO.WinnerResponseDTO;
 import com.example.ricettario.entities.PollCandidate;
 import com.example.ricettario.entities.PollSuggestion;
@@ -80,8 +81,7 @@ public class PollApiController {
                                     c.getRecipe().getId(),
                                     c.getRecipe().getName(),
                                     c.getRecipe().getImageUrl(),
-                                    voteService.countByCandidate_Id(c.getId()),
-                                    user.getUsername());
+                                    voteService.countByCandidate_Id(c.getId()));
 
                             return newCand;
 
@@ -92,8 +92,7 @@ public class PollApiController {
                                     c.getRecipe().getId(),
                                     c.getRecipe().getName(),
                                     c.getRecipe().getImageUrl(),
-                                    voteService.countByCandidate_Id(c.getId()),
-                                    "none");
+                                    voteService.countByCandidate_Id(c.getId()));
 
                             return newCand;
 
@@ -123,6 +122,16 @@ public class PollApiController {
 
             });
 
+            List<PollVote> votes = voteService.findByPoll_Id(poll.getId());
+
+            List<VoteResponseDTO> votesDTO = votes.stream()
+                    .map(v -> {
+
+                        return new VoteResponseDTO(v.getCandidate().getRecipe().getName(), v.getUser().getUsername());
+
+                    })
+                    .collect(Collectors.toList());
+
             ActivePollResponseDTO newPoll = new ActivePollResponseDTO();
             newPoll.setPollId(poll.getId());
             newPoll.setWeekStart(poll.getWeekStart());
@@ -132,6 +141,7 @@ public class PollApiController {
                     "none",
                     "none"));
             newPoll.setSuggestions(suggestionDTOs);
+            newPoll.setVotes(votesDTO);
 
             return ResponseEntity.ok(newPoll);
 
@@ -162,8 +172,7 @@ public class PollApiController {
                                     c.getRecipe().getId(),
                                     c.getRecipe().getName(),
                                     c.getRecipe().getImageUrl(),
-                                    voteService.countByCandidate_Id(c.getId()),
-                                    user.getUsername());
+                                    voteService.countByCandidate_Id(c.getId()));
 
                             return newCand;
 
@@ -174,8 +183,7 @@ public class PollApiController {
                                     c.getRecipe().getId(),
                                     c.getRecipe().getName(),
                                     c.getRecipe().getImageUrl(),
-                                    voteService.countByCandidate_Id(c.getId()),
-                                    "none");
+                                    voteService.countByCandidate_Id(c.getId()));
 
                             return newCand;
 

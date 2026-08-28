@@ -13,6 +13,8 @@ public interface IVoteRepository extends JpaRepository<PollVote, Integer> {
 
     Optional<PollVote> findByPoll_IdAndCandidate_Id(Integer pollId, Integer candidateId);
 
+    List<PollVote> findByPoll_Id(Integer pollId);
+
     boolean existsByPoll_IdAndCandidate_Id(Integer pollId, Integer candidateId);
 
 }

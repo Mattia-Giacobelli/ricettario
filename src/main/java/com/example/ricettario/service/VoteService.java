@@ -1,5 +1,7 @@
 package com.example.ricettario.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.example.ricettario.entities.PollVote;
@@ -19,6 +21,12 @@ public class VoteService {
     public Integer countByCandidate_Id(int id) {
 
         return voteRepository.countByCandidate_Id(id);
+
+    }
+
+    public List<PollVote> findByPoll_Id(Integer pollId) {
+
+        return voteRepository.findByPoll_Id(pollId);
 
     }
 

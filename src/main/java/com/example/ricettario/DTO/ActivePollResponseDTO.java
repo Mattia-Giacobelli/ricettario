@@ -14,6 +14,7 @@ public class ActivePollResponseDTO {
     private LocalDate weekEnd;
     private List<CandidateResponseDTO> candidates;
     private List<SuggestionResponseDTO> suggestions;
+    private List<VoteResponseDTO> votes;
     private WinnerResponseDTO winningRecipe;
 
     public Integer getPollId() {
@@ -62,6 +63,14 @@ public class ActivePollResponseDTO {
 
     public void setSuggestions(List<SuggestionResponseDTO> suggestions) {
         this.suggestions = suggestions;
+    }
+
+    public List<VoteResponseDTO> getVotes() {
+        return votes;
+    }
+
+    public void setVotes(List<VoteResponseDTO> votes) {
+        this.votes = votes;
     }
 
 }
