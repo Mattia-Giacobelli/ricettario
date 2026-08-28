@@ -41,7 +41,7 @@ public class AiRecipeService {
 
         StringBuilder sb = new StringBuilder();
         sb.append(
-                "Scegli da 1 a 5, il più possibile, ricette di cucina che rispettino questi criteri o almeno simili:\n");
+                "Scegli esattamente 5 ricette, puoi anche duplicarle, di cucina che rispettino questi criteri o almeno simili:\n");
 
         if (request.getPreferredTags() != null && !request.getPreferredTags().isEmpty()) {
             sb.append("- Tag/categorie preferite: ")
@@ -51,6 +51,15 @@ public class AiRecipeService {
             sb.append("- Difficoltà da 1 'facile' a 5 'molto difficile': ").append(request.getDifficulty())
                     .append("\n");
         }
+        if (request.getDescription() != null) {
+            sb.append("- Descrizione generale della ricetta non solo del campo description: ")
+                    .append(request.getDescription())
+                    .append("\n");
+        }
+
+        sb.append(
+                "Se nella description richiede 'qualsisi ricetta' o simili basati sui tag e solo in caso di assenza di corrispondenze in tutti i campi forniti analizza la descrizione per selezionarle a tua scelta cercando di differenziare il più possibile")
+                .append("\n");
 
         List<Recipe> recipes = recipeService.findAll();
 
@@ -63,17 +72,16 @@ public class AiRecipeService {
 
             newReqRecipe.setName(recipe.getName());
             newReqRecipe.setDescription(recipe.getDescription());
-            recipe.getTags().stream().forEach(tag -> {
 
-                String tagS = tag.getName();
+            recipe.getTags().forEach(tag -> newReqRecipe.getTags().add(tag.getName()));
 
-                newReqRecipe.getTags().add(tagS);
-
-            });
-            newReqRecipe.setdifficulty(recipe.getRating().getDifficulty());
+            if (recipe.getRating() != null) {
+                newReqRecipe.setdifficulty(recipe.getRating().getDifficulty());
+            } else {
+                newReqRecipe.setdifficulty(null);
+            }
 
             aiRecipes.add(newReqRecipe);
-
         });
 
         System.out.println("Ricette aggiunte al dto: " + aiRecipes.size() + aiRecipes.getFirst().getName());

@@ -11,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -29,6 +30,12 @@ public class SecurityConfig {
     }
 
     @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        // Esclude completamente i path degli upload dai filtri di sicurezza
+        return (web) -> web.ignoring().requestMatchers("/uploads/**");
+    }
+
+    @Bean
     @Order(1)
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -42,7 +49,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
-                        .requestMatchers("/api/recipes/**").permitAll()
+                        .requestMatchers("/api/recipes/**", "/api/tags", "/api/ai/**", "/uploads/recipes/**")
+                        .permitAll()
                         .requestMatchers("/api/polls/active", "/api/polls/last-poll").permitAll()
                         .anyRequest().authenticated())
 
@@ -62,7 +70,9 @@ public class SecurityConfig {
                 .csrf(Customizer.withDefaults()) // qui la sessione c'è, quindi CSRF va tenuto attivo
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/users/register", "/css/**", "/js/**", "/error").permitAll()
+                        .requestMatchers("/", "/login", "/users/register", "/css/**", "/js/**", "/error", "/api/tags",
+                                "/api/ai/**", "/uploads/recipes/**")
+                        .permitAll()
                         .requestMatchers("/home/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/ingredients/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/recipies", "/recipies/**").hasAnyRole("USER", "ADMIN")
