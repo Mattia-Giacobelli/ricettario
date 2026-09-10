@@ -192,20 +192,33 @@ public class PollApiController {
                     })
                     .collect(Collectors.toList());
 
-            WinnerResponseDTO winner = new WinnerResponseDTO(poll.getWinningRecipe().getId(),
-                    poll.getWinningRecipe().getName(),
-                    poll.getWinningRecipe().getImageUrl());
-
             ActivePollResponseDTO newPoll = new ActivePollResponseDTO();
-            newPoll.setPollId(poll.getId());
-            newPoll.setWeekStart(poll.getWeekStart());
-            newPoll.setWeekEnd(poll.getWeekEnd());
-            newPoll.setCandidates(candidateDTOs);
-            newPoll.setWinningRecipe(winner);
+
+            if (poll.getWinningRecipe() != null) {
+
+                WinnerResponseDTO winner = new WinnerResponseDTO(poll.getWinningRecipe().getId(),
+                        poll.getWinningRecipe().getName(),
+                        poll.getWinningRecipe().getImageUrl());
+
+                newPoll.setPollId(poll.getId());
+                newPoll.setWeekStart(poll.getWeekStart());
+                newPoll.setWeekEnd(poll.getWeekEnd());
+                newPoll.setCandidates(candidateDTOs);
+                newPoll.setWinningRecipe(winner);
+
+            } else {
+
+                newPoll.setPollId(poll.getId());
+                newPoll.setWeekStart(poll.getWeekStart());
+                newPoll.setWeekEnd(poll.getWeekEnd());
+                newPoll.setCandidates(candidateDTOs);
+                newPoll.setWinningRecipe(null); // esplicito, per chiarezza — anche se è già il default
+            }
 
             return ResponseEntity.ok(newPoll);
 
         } catch (RuntimeException e) {
+            e.printStackTrace();
             return ResponseEntity.notFound().build();
         }
     }

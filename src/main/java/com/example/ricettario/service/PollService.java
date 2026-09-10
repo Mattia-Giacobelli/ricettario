@@ -41,7 +41,7 @@ public class PollService {
     public WeeklyPoll getLastPoll() {
 
         return pollRepository.findTopByStatusOrderByWeekEndDesc(Status.closed).orElseThrow(
-                () -> new RuntimeException("Nessun poll attivo per oggi"));
+                () -> new RuntimeException("Nessun poll chiuso trovato per oggi"));
 
     }
 
