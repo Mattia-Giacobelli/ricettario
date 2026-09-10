@@ -85,7 +85,7 @@
 
                     <div class="position-relative mb-2">
                         <input type="text" id="tagSearchInput" class="form-control" placeholder="Cerca o crea tag..."
-                            autocomplete="off" oninput="onTagSearch(this)">
+                            autocomplete="off" oninput="onTagSearch(this)" onkeydown="onTagKeyDown(event, this)">
                         <div id="tagSuggestions" class="list-group position-absolute w-100"
                             style="z-index:1000; display:none;"></div>
                     </div>
