@@ -48,7 +48,9 @@ public class AiRecipeService {
                     .append(String.join(", ", request.getPreferredTags())).append("\n");
         }
         if (request.getDifficulty() != null) {
-            sb.append("- Difficoltà da 1 'facile' a 5 'molto difficile': ").append(request.getDifficulty())
+            sb.append(
+                    "- Difficoltà da 1 'facile' a 5 'molto difficile', uguale o inferiore al valore di seguito fornito: ")
+                    .append(request.getDifficulty())
                     .append("\n");
         }
         if (request.getDescription() != null) {
@@ -84,7 +86,7 @@ public class AiRecipeService {
             aiRecipes.add(newReqRecipe);
         });
 
-        System.out.println("Ricette aggiunte al dto: " + aiRecipes.size() + aiRecipes.getFirst().getName());
+        System.out.println("Ricette aggiunte al dto: " + aiRecipes.size() + aiRecipes);
 
         sb.append("La scelta va fatta tra queste ricette:");
 
