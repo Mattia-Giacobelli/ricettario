@@ -98,7 +98,7 @@ public class RecipeAPIController {
     @GetMapping("")
     public ResponseEntity<Page<RecipeResponseDTO>> index(@RequestParam(defaultValue = "0") int page) {
 
-        Pageable pageable = PageRequest.of(page, 20, Sort.by("name").ascending());
+        Pageable pageable = PageRequest.of(page, 4, Sort.by("name").ascending());
         Page<Recipe> recipes = recipeService.findAll(pageable);
 
         return ResponseEntity.ok(recipes.map(this::toResponseDTO));
