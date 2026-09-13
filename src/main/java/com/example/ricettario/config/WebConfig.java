@@ -27,7 +27,8 @@ public class WebConfig implements WebMvcConfigurer {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("https://ricettario-spring.duckdns.org",
-                "https://ricettario-react.giacobelli-mattia12.workers.dev", "http://localhost:5173/"));
+                "https://ricettario-react.giacobelli-mattia12.workers.dev", "http://localhost:5173/",
+                "https://www.mattiagiacobellidev.it/ricettario-react"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // fondamentale per i cookie cross-origin
