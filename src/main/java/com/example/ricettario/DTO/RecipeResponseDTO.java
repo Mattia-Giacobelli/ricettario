@@ -8,6 +8,7 @@ public class RecipeResponseDTO {
     private String name;
     private String description;
     private String instructions;
+    private Integer timesPrep;
     private String imageUrl;
     private List<String> tags;
     private List<IngredientResponseDTO> ingredients;
@@ -75,5 +76,13 @@ public class RecipeResponseDTO {
 
     public void setRating(RatingResponseDTO rating) {
         this.rating = rating;
+    }
+
+    public Integer getTimesPrep() {
+        return timesPrep;
+    }
+
+    public void setTimesPrep(Integer timesPrep) {
+        this.timesPrep = timesPrep;
     }
 }

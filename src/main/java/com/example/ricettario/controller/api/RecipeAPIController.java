@@ -67,6 +67,7 @@ public class RecipeAPIController {
         dto.setName(recipe.getName());
         dto.setDescription(recipe.getDescription());
         dto.setInstructions(recipe.getInstructions());
+        dto.setTimesPrep(recipe.getTimesPrep());
         dto.setImageUrl(recipe.getImageUrl());
 
         dto.setTags(recipe.getTags().stream()
