@@ -70,33 +70,14 @@ public class PollApiController {
             List<CandidateResponseDTO> candidateDTOs = pollCandidates.stream()
                     .map(c -> {
 
-                        if (voteService.existsByPoll_IdAndCandidate_Id(poll.getId(), c.getId())) {
+                        CandidateResponseDTO newCand = new CandidateResponseDTO(
+                                c.getId(),
+                                c.getRecipe().getId(),
+                                c.getRecipe().getName(),
+                                c.getRecipe().getImageUrl(),
+                                voteService.countByCandidate_Id(c.getId()));
 
-                            PollVote vote = voteService.findByPoll_IdAndCandidate_Id(poll.getId(), c.getId());
-
-                            User user = vote.getUser();
-
-                            CandidateResponseDTO newCand = new CandidateResponseDTO(
-                                    c.getId(),
-                                    c.getRecipe().getId(),
-                                    c.getRecipe().getName(),
-                                    c.getRecipe().getImageUrl(),
-                                    voteService.countByCandidate_Id(c.getId()));
-
-                            return newCand;
-
-                        } else {
-
-                            CandidateResponseDTO newCand = new CandidateResponseDTO(
-                                    c.getId(),
-                                    c.getRecipe().getId(),
-                                    c.getRecipe().getName(),
-                                    c.getRecipe().getImageUrl(),
-                                    voteService.countByCandidate_Id(c.getId()));
-
-                            return newCand;
-
-                        }
+                        return newCand;
 
                     })
                     .collect(Collectors.toList());
@@ -161,33 +142,14 @@ public class PollApiController {
             List<CandidateResponseDTO> candidateDTOs = pollCandidates.stream()
                     .map(c -> {
 
-                        if (voteService.existsByPoll_IdAndCandidate_Id(poll.getId(), c.getId())) {
+                        CandidateResponseDTO newCand = new CandidateResponseDTO(
+                                c.getId(),
+                                c.getRecipe().getId(),
+                                c.getRecipe().getName(),
+                                c.getRecipe().getImageUrl(),
+                                voteService.countByCandidate_Id(c.getId()));
 
-                            PollVote vote = voteService.findByPoll_IdAndCandidate_Id(poll.getId(), c.getId());
-
-                            User user = vote.getUser();
-
-                            CandidateResponseDTO newCand = new CandidateResponseDTO(
-                                    c.getId(),
-                                    c.getRecipe().getId(),
-                                    c.getRecipe().getName(),
-                                    c.getRecipe().getImageUrl(),
-                                    voteService.countByCandidate_Id(c.getId()));
-
-                            return newCand;
-
-                        } else {
-
-                            CandidateResponseDTO newCand = new CandidateResponseDTO(
-                                    c.getId(),
-                                    c.getRecipe().getId(),
-                                    c.getRecipe().getName(),
-                                    c.getRecipe().getImageUrl(),
-                                    voteService.countByCandidate_Id(c.getId()));
-
-                            return newCand;
-
-                        }
+                        return newCand;
 
                     })
                     .collect(Collectors.toList());
