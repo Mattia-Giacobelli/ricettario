@@ -6,11 +6,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.ricettario.entities.PollCandidate;
+import com.example.ricettario.entities.PollResultView;
 import com.example.ricettario.entities.PollVote;
+import com.example.ricettario.entities.Recipe;
 import com.example.ricettario.entities.User;
 import com.example.ricettario.entities.WeeklyPoll;
 import com.example.ricettario.repositories.ICandidateRepository;
+import com.example.ricettario.repositories.IPollResultViewRepository;
 import com.example.ricettario.repositories.IPollVoteRepository;
+import com.example.ricettario.repositories.IRecipeRepository;
 import com.example.ricettario.repositories.IWeeklyPollRepository;
 import com.example.ricettario.utilities.Status;
 
@@ -21,13 +25,18 @@ public class PollService {
     private final IWeeklyPollRepository pollRepository;
     private final ICandidateRepository candidateRepository;
     private final IPollVoteRepository voteRepository;
+    private final IPollResultViewRepository pollResultViewRepository;
+    private final IRecipeRepository recipeRepository;
 
     public PollService(IWeeklyPollRepository pollRepository, ICandidateRepository candidateRepository,
-            IPollVoteRepository voteRepository) {
+            IPollVoteRepository voteRepository, IPollResultViewRepository pollResultViewRepository,
+            IRecipeRepository recipeRepository) {
 
         this.pollRepository = pollRepository;
         this.candidateRepository = candidateRepository;
         this.voteRepository = voteRepository;
+        this.pollResultViewRepository = pollResultViewRepository;
+        this.recipeRepository = recipeRepository;
 
     }
 
@@ -75,6 +84,15 @@ public class PollService {
         vote.setUser(user);
 
         voteRepository.save(vote);
+    }
+
+    public Recipe getWinningRecipe(Integer pollId) {
+
+        PollResultView result = pollResultViewRepository.findTopByPollIdOrderByVotesDesc(pollId);
+
+        return recipeRepository.findById(result.getCandidateId())
+                .orElseThrow(() -> new RuntimeException("Nessun vincitore"));
+
     }
 
     @Transactional

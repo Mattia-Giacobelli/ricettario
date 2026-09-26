@@ -174,7 +174,7 @@ public class PollApiController {
                 newPoll.setWeekStart(poll.getWeekStart());
                 newPoll.setWeekEnd(poll.getWeekEnd());
                 newPoll.setCandidates(candidateDTOs);
-                newPoll.setWinningRecipe(null); // esplicito, per chiarezza — anche se è già il default
+                newPoll.setWinningRecipe(null);
             }
 
             return ResponseEntity.ok(newPoll);

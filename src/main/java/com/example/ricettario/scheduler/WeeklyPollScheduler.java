@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component;
 
 import com.example.ricettario.entities.Recipe;
 import com.example.ricettario.entities.WeeklyPoll;
+import com.example.ricettario.repositories.IVoteRepository;
 import com.example.ricettario.repositories.IWeeklyPollRepository;
+import com.example.ricettario.service.PollService;
 import com.example.ricettario.utilities.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +20,12 @@ public class WeeklyPollScheduler {
     private static final Logger log = LoggerFactory.getLogger(WeeklyPollScheduler.class);
 
     private final IWeeklyPollRepository weeklyPollRepo;
+    private final PollService pollService;
 
-    public WeeklyPollScheduler(IWeeklyPollRepository weeklyPollRepository) {
+    public WeeklyPollScheduler(IWeeklyPollRepository weeklyPollRepository, PollService pollService) {
 
         this.weeklyPollRepo = weeklyPollRepository;
+        this.pollService = pollService;
 
     }
 
@@ -59,7 +63,28 @@ public class WeeklyPollScheduler {
 
         poll.setStatus(Status.closed);
 
-        Recipe winning;
+        // Extract winning recipe
+        Recipe winning = null;
+
+        winning = pollService.getWinningRecipe(poll.getId());
+
+        poll.setWinningRecipe(winning);
+
+        weeklyPollRepo.save(poll);
+
+    }
+
+    @Scheduled(cron = "0 59 12 * * SAT")
+    public void checkWinner() {
+
+        WeeklyPoll poll = pollService.getLastPoll();
+
+        // Extract winning recipe
+        Recipe winning = null;
+
+        winning = pollService.getWinningRecipe(poll.getId());
+
+        poll.setWinningRecipe(winning);
 
         weeklyPollRepo.save(poll);
 
