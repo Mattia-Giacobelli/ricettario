@@ -74,7 +74,7 @@ public class WeeklyPollScheduler {
 
     }
 
-    @Scheduled(cron = "0 59 12 * * SAT")
+    @Scheduled(cron = "0 59 15 * * SAT")
     public void checkWinner() {
 
         WeeklyPoll poll = pollService.getLastPoll();

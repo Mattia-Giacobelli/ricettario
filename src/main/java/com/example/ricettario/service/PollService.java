@@ -90,7 +90,7 @@ public class PollService {
 
         PollResultView result = pollResultViewRepository.findTopByPollIdOrderByVotesDesc(pollId);
 
-        return recipeRepository.findById(result.getCandidateId())
+        return recipeRepository.findById(result.getRecipeId())
                 .orElseThrow(() -> new RuntimeException("Nessun vincitore"));
 
     }
