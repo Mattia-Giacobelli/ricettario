@@ -40,28 +40,37 @@ public class AiRecipeService {
     private String buildPrompt(RecipeSuggestionRequestDTO request) {
 
         StringBuilder sb = new StringBuilder();
+
         sb.append(
-                "Scegli esattamente 5 ricette, puoi anche duplicarle, di cucina che rispettino questi criteri o almeno simili:\n");
+                "Scegli esattamente 5 ricette (puoi ripeterle se necessario) dalla lista fornita più sotto, "
+                        + "che rispettino il più possibile questi criteri. Non è necessario che una ricetta "
+                        + "soddisfi TUTTI i criteri contemporaneamente: scegli le 5 che si avvicinano di più, "
+                        + "dando priorità ai criteri nell'ordine in cui sono elencati.\n");
 
         if (request.getPreferredTags() != null && !request.getPreferredTags().isEmpty()) {
-            sb.append("- Tag/categorie preferite: ")
+            sb.append("- Tag/categorie preferite (priorità alta): ")
                     .append(String.join(", ", request.getPreferredTags())).append("\n");
         }
         if (request.getDifficulty() != null) {
-            sb.append(
-                    "- Difficoltà da 1 'facile' a 5 'molto difficile', uguale o inferiore al valore di seguito fornito: ")
+            sb.append("- Difficoltà desiderata da 1 'facile' a 5 'molto difficile' (priorità media): ")
                     .append(request.getDifficulty())
                     .append("\n");
         }
         if (request.getDescription() != null) {
-            sb.append("- Descrizione generale della ricetta non solo del campo description: ")
+            sb.append("- Descrizione/preferenze aggiuntive espresse liberamente dall'utente (priorità media): ")
                     .append(request.getDescription())
                     .append("\n");
         }
 
         sb.append(
-                "Se nella description richiede 'qualsisi ricetta' o simili basati sui tag e solo in caso di assenza di corrispondenze in tutti i campi forniti analizza la descrizione per selezionarle a tua scelta cercando di differenziare il più possibile")
-                .append("\n");
+                "Se la descrizione contiene richieste generiche tipo 'qualsiasi ricetta' o simili, "
+                        + "ignora quel campo e basati solo sugli altri criteri forniti. "
+                        + "Se NESSUN criterio è stato fornito, scegli 5 ricette a tua discrezione dalla lista.\n");
+
+        sb.append(
+                "IMPORTANTE: rispondi con l'array di errore SOLO se la lista di ricette fornita più sotto "
+                        + "è completamente vuota. In ogni altro caso, scegli sempre 5 ricette dalla lista, "
+                        + "anche se nessuna corrisponde perfettamente ai criteri.\n");
 
         List<Recipe> recipes = recipeService.findAll();
 
